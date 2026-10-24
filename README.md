@@ -92,6 +92,15 @@ unverified.
 
 ## Entity glow
 
+Use `/glow Rasmore` to highlight one online player by username (case-insensitive).
+Player names autocomplete from the current server's player list. Repeat with other
+names to select multiple players; existing mob filters remain active. Selections
+track player UUIDs and apply when those players are loaded, including after they
+come into render distance. `/glow only Rasmore` replaces all filters with that
+player. For names that collide with a filter or command, use `/glow player NAME`
+(or `/glow only player NAME`). Offline/unknown names report an error without
+clearing existing selections.
+
 Filters stack: `/glow slime` followed by `/glow creeper` highlights both types.
 `/glow @a` or `/glow players` adds all loaded players. `/glow hostile` adds mobs
 in Minecraft's MONSTER category; `/glow passive` adds other mobs (including neutral
