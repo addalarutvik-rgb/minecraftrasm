@@ -13,11 +13,13 @@ requires Fabric Loader, Fabric API, and Rasm on your own client.
 
 | Default key | Action |
 | --- | --- |
-| Right Shift | Open the Rasm Client menu |
+| `[` | Open the Rasm Client menu |
 | R | Turn 180 degrees, hold briefly, then turn back along the same arc |
 | G | Toggle client-side flight |
 
 Change bindings in **Options → Controls → Key Binds → Rasm Client**.
+If upgrading from an older build, Minecraft may retain the previous menu key;
+set **Open Rasm menu** to **[** there (or reset that binding to its new default).
 The quick turn lasts two client ticks (about 100 ms at normal speed), affects
 horizontal facing, and leaves pitch unchanged. Mouse yaw during the pulse is
 replaced by the original heading on return. It does not trigger while sleeping
@@ -28,7 +30,7 @@ or riding. GUI screens consume hotkeys without triggering actions.
 Press **G** to enable/disable local flight. Use your normal forward/back/strafe
 keys to move relative to your camera, Jump to ascend, Sneak to descend, and Sprint
 for faster horizontal movement. Releasing movement keys hovers locally. The
-Right Shift menu shows whether client flight is ON or OFF. Menus stop directional
+`[` menu shows whether client flight is ON or OFF. Menus stop directional
 flight input; closing the menu resumes normal controls.
 
 This mode does not require a mod, allowlist entry, or flight permission on the
@@ -51,7 +53,7 @@ permissions. The quick-turn hotkey is independent of flight.
    find a connected player's UUID in the server's `usercache.json`. A denied
    flight request also displays the requesting player's UUID.
 4. Restart the server to load the list. Each permitted player installs Fabric,
-   Fabric API, and the same Rasm JAR on their client, then uses **Request server-permitted flight** in the Right Shift menu.
+   Fabric API, and the same Rasm JAR on their client, then uses **Request server-permitted flight** in the `[` menu.
 
 Example allowlist (replace this example UUID with your actual player UUID):
 

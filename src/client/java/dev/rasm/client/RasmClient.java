@@ -23,7 +23,7 @@ public final class RasmClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         var category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("rasmclient", "controls"));
-        menuKey = key("menu", GLFW.GLFW_KEY_RIGHT_SHIFT, category);
+        menuKey = key("menu", GLFW.GLFW_KEY_LEFT_BRACKET, category);
         flipKey = key("flip", GLFW.GLFW_KEY_R, category);
         flightKey = key("flight", GLFW.GLFW_KEY_G, category);
         ClientTickEvents.START_CLIENT_TICK.register(flight::tick);
