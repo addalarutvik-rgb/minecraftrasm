@@ -28,7 +28,7 @@ public final class RasmClient implements ClientModInitializer {
     private int attackDelay = -1;
     final SwapActions swaps = new SwapActions();
     final GhostBlock ghost = new GhostBlock();
-    private KeyMapping noFallKey, lungeKey, maceKey, ghostKey, serverFlightKey;
+    private KeyMapping noFallKey, lungeKey, maceKey, ghostKey, serverFlightKey, stunKey;
     private KeyMapping menuKey;
     private KeyMapping flipKey;
     private KeyMapping flightKey;
@@ -42,6 +42,7 @@ public final class RasmClient implements ClientModInitializer {
         noFallKey = key("nofall", GLFW.GLFW_KEY_N, category);
         lungeKey = key("lunge", GLFW.GLFW_KEY_Z, category);
         maceKey = key("mace", GLFW.GLFW_KEY_X, category);
+        stunKey = key("stun_slam", GLFW.GLFW_KEY_V, category);
         ghostKey = key("ghost", GLFW.GLFW_KEY_B, category);
         serverFlightKey = key("server_flight", GLFW.GLFW_KEY_UNKNOWN, category);
         EntityGlow.register();
@@ -101,6 +102,7 @@ public final class RasmClient implements ClientModInitializer {
         while (noFallKey.consumeClick()) NoFall.toggle(client);
         while (lungeKey.consumeClick()) swaps.lunge(client);
         while (maceKey.consumeClick()) swaps.mace(client);
+        while (stunKey.consumeClick()) swaps.stunSlam(client);
         while (ghostKey.consumeClick()) ghost.place(client);
         while (serverFlightKey.consumeClick()) requestServerFlight(client);
     }
@@ -109,7 +111,7 @@ public final class RasmClient implements ClientModInitializer {
         while (menuKey.consumeClick()) { }
         while (flipKey.consumeClick()) { }
         while (flightKey.consumeClick()) { }
-        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey})
+        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey})
             while (key.consumeClick()) { }
     }
 

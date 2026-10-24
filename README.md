@@ -20,6 +20,7 @@ requires Fabric Loader, Fabric API, and Rasm on your own client.
 | Z | One lunge swap (slots 1 / 3) |
 | X | One mace swap (slots 1 / 2) |
 | B | Add a ghost block under your feet |
+| V | Stun Slam: axe in slot 8 → mace in slot 2 |
 
 Change every action binding in **Options → Controls → Key Binds → Rasm Client**,
 or click **Rebind keys** in the Rasm menu. Server-permitted flight is unbound by
@@ -48,6 +49,27 @@ mace. It attacks with slot 1, changes to slot 2 for a second attack, and returns
 to slot 1. It does not create fall distance or guarantee extra damage.
 
 Opening a menu, disconnecting, dying, or changing worlds cancels a pending swap.
+
+## Stun Slam
+
+Put an **axe in hotbar slot 8** and a **mace in slot 2**. Aim at a living entity
+within melee reach, then press **V** or click **Stun Slam 8 / 2** in the menu.
+The action selects the axe, waits for at least 90% attack charge (up to two
+seconds), attacks, switches to
+the mace and attacks on the next tick, then restores the slot you started with.
+It runs once per press; presses during another swap are ignored. V can be rebound.
+
+Both hits use the selected entity, not a block click. Missing weapons, no target,
+a target leaving reach/line of sight, death, opening a screen, or a world change
+cancel the action. It does not make you jump or create fall distance: use it while
+falling if you want a mace smash. Shield disabling, cooldowns, invulnerability
+frames, and damage are still decided by Minecraft and the server.
+
+The [provided tutorial](https://www.youtube.com/watch?v=ttkeMY68JwU) was blocked by
+this environment, so exact equivalence to its timing has not been verified.
+Local testing confirmed a charged hit on an iron golem and restoration of the
+original fifth slot. Actual PvP shield-disable and falling-smash behavior remain
+unverified.
 
 ## Entity glow
 
