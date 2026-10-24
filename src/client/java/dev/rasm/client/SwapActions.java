@@ -15,6 +15,7 @@ final class SwapActions {
     private boolean lunge;
     private boolean mace;
     private boolean stun;
+    private boolean shield;
     private int returnSlot;
     private LivingEntity stunTarget;
     private int phase;
@@ -22,10 +23,10 @@ final class SwapActions {
     private LocalPlayer owner;
     private ClientLevel level;
     boolean lungeActive() { return lunge; }
-    boolean active() { return lunge || mace || stun; }
-    void stop() { lunge = false; mace = false; stun = false; stunTarget = null; phase = 0; delay = 0; owner = null; level = null; }
+    boolean active() { return lunge || mace || stun || shield; }
+    void stop() { lunge = false; mace = false; stun = false; shield = false; stunTarget = null; phase = 0; delay = 0; owner = null; level = null; }
     void lunge(Minecraft client) {
-        if (lunge || mace || stun) return;
+        if (active()) return;
         if (!ready(client)) return;
         if (!client.player.getInventory().getItem(2).is(ItemTags.SPEARS)) {
             return;
@@ -33,7 +34,7 @@ final class SwapActions {
         stop(); owner = client.player; level = client.level; lunge = true;
     }
     void mace(Minecraft client) {
-        if (lunge || mace || stun) return;
+        if (active()) return;
         if (!ready(client)) return;
         if (!client.player.getInventory().getItem(1).is(Items.MACE)) {
             return;
@@ -41,7 +42,7 @@ final class SwapActions {
         stop(); owner = client.player; level = client.level; mace = true;
     }
     void stunSlam(Minecraft client) {
-        if (lunge || mace || stun || !ready(client)) return;
+        if (active() || !ready(client)) return;
         client.gameRenderer.pick(1.0F);
         LivingEntity target = client.hitResult instanceof EntityHitResult hit
             && hit.getEntity() instanceof LivingEntity living ? living : null;
@@ -58,47 +59,44 @@ final class SwapActions {
         stop(); owner = client.player; level = client.level; stun = true;
         returnSlot = owner.getInventory().getSelectedSlot();
         stunTarget = target;
-        tick(client); // Start the slot-1/axe sequence on the keypress itself.
+        tick(client); // Select slot 1 now; allow a tick before the axe hit.
     }
 
     void shieldStun(Minecraft client) {
-        if (lunge || mace || stun || !ready(client) || client.screen != null) return;
+        if (active() || !ready(client) || client.screen != null) return;
         if (!client.player.getInventory().getItem(7).is(ItemTags.AXES)) {
             return;
         }
         client.gameRenderer.pick(1.0F);
         LivingEntity target = client.hitResult instanceof EntityHitResult hit
             && hit.getEntity() instanceof LivingEntity living ? living : null;
-        // Ordered slot/attack packets in one tick; never issue a mining click.
-        select(client, 0);
-        try {
-            select(client, 7);
-            entityAttackOrSwing(client, target);
-        } finally {
-            select(client, 0);
-        }
+        stop(); owner = client.player; level = client.level; shield = true;
+        stunTarget = target;
+        tick(client);
     }
 
     private boolean ready(Minecraft client) { return client.player != null && client.gameMode != null && client.player.isAlive(); }
     void tick(Minecraft client) {
-        if (!lunge && !mace && !stun) return;
+        if (!active()) return;
         if (!ready(client) || owner != client.player || level != client.level) { stop(); return; }
         if (client.screen != null) { restore(client); stop(); return; }
-        if (stun && (!owner.getInventory().getItem(7).is(ItemTags.AXES)
-                || !owner.getInventory().getItem(1).is(Items.MACE))) {
+        if ((stun || shield) && (!owner.getInventory().getItem(7).is(ItemTags.AXES)
+                || stun && !owner.getInventory().getItem(1).is(Items.MACE))) {
             restore(client); stop(); return;
         }
         if (delay-- > 0) return;
         if (phase == 0) {
             select(client, 0);
-            if (stun) {
+            phase = lunge ? 2 : 1; // Lunge skips the slot-1 attack entirely.
+        } else if (phase == 1) {
+            if (stun || shield) {
                 select(client, 7);
                 attack(client);
-                phase = 2; // Mace on the next tick, without waiting for axe charge.
-            } else phase = 1;
-        } else if (phase == 1) {
-            attack(client); phase = 2;
-            if (lunge) delay = 4; // Recover the fast item before changing to the spear.
+                phase = shield ? 3 : 2;
+                if (stun) delay = 1; // Two ticks (~100 ms) from axe hit to mace hit.
+            } else {
+                attack(client); phase = 2;
+            }
         } else if (phase == 2) {
             if ((lunge && !owner.getInventory().getItem(2).is(ItemTags.SPEARS))
                     || (mace && !owner.getInventory().getItem(1).is(Items.MACE))) { restore(client); stop(); return; }
@@ -114,7 +112,7 @@ final class SwapActions {
         client.player.connection.send(new ServerboundSetCarriedItemPacket(slot));
     }
     private void attack(Minecraft client) {
-        if (stun) {
+        if (stun || shield) {
             entityAttackOrSwing(client, stunTarget);
         } else click(client);
     }

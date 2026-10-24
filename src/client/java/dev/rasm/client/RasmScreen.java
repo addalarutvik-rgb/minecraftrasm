@@ -22,7 +22,7 @@ final class RasmScreen extends Screen {
         button("KB flick + Stun Slam", x, y, half, () -> { closeForAction(); controls.quickTurn(Minecraft.getInstance()); });
         button("Lunge swap 1 / 3", x + half + 6, y, half, () -> {
             closeForAction(); controls.swaps.lunge(Minecraft.getInstance());
-        }).setTooltip(Tooltip.create(Component.literal("Slot 1: low-cooldown item. Slot 3: Lunge spear. One sequence per press.")));
+        }).setTooltip(Tooltip.create(Component.literal("Slot 1: low-cooldown item. Slot 3: Lunge spear. Only the spear attacks; one sequence per press.")));
         button("Mace swap 1 / 2", x, y + 28, half, () -> {
             closeForAction(); controls.swaps.mace(Minecraft.getInstance());
         }).setTooltip(Tooltip.create(Component.literal("Attacks with slot 1, switches to a mace in slot 2, attacks, then returns to slot 1.")));
@@ -40,7 +40,7 @@ final class RasmScreen extends Screen {
             () -> Minecraft.getInstance().setScreen(new KeyBindsScreen(this, Minecraft.getInstance().options)));
         button("Shield Stun 1 / 8 / 1", x, y + 144, half, () -> {
             closeForAction(); controls.swaps.shieldStun(Minecraft.getInstance());
-        }).setTooltip(Tooltip.create(Component.literal("Axe in slot 8. Selects 1, attacks with 8, returns to 1 immediately. Swings in air when no target is available.")));
+        }).setTooltip(Tooltip.create(Component.literal("Axe in slot 8. Selects 1, attacks with 8, returns to 1 with one tick between steps. Swings in air when no target is available.")));
         button("Done", x + half + 6, y + 144, half, this::onClose);
     }
     private void closeForAction() { Minecraft.getInstance().setScreen(null); }

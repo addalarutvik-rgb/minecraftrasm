@@ -32,8 +32,9 @@ set **Open Rasm menu** to **[** there (or reset that binding to its new default)
 The KB flick rotates out by +180 degrees, synchronizes the current sprint state,
 sends the new facing, and sends an **entity attack in the same client tick**. It
 immediately starts Stun Slam against that same locked target: slot 1 → axe in
-slot 8, then a mace in slot 2 on the following tick. The mace attack runs before
-the camera returns by -180 degrees on that tick (about 50 ms). One R press or
+slot 8 after one tick, then a mace in slot 2 two ticks after the axe hit.
+The camera returns by -180 degrees after the axe hit (about 50 ms); the mace
+follows with the slightly slower Stun Slam timing. One R press or
 **KB flick + Stun Slam** menu click runs the combination; you no longer need to
 press both buttons. Put an axe in slot 8 and a mace in slot 2. Without those items,
 the ordinary flick still runs and the swap is silently skipped.
@@ -58,8 +59,9 @@ The [reference video](https://www.youtube.com/watch?v=7t0PyqYsac8) was blocked h
 ## Swap actions
 
 **Z — Lunge swap once:** slot 1 holds your low-cooldown item (or empty hand),
-slot 3 holds a Lunge-enchanted spear. Each press selects slot 1, allows one preparation tick, clicks it, waits for its short
-cooldown, clicks with slot 3, and returns to slot 1. Press again to repeat; presses
+slot 3 holds a Lunge-enchanted spear. Each press selects slot 1, allows one preparation
+tick, switches to slot 3 and clicks once, then returns to slot 1 on the next tick.
+There is no initial slot-1 attack. Press again to repeat; presses
 during an unfinished sequence are ignored. There is no automatic loop. Hunger,
 enchantments, and server mechanics still apply.
 
@@ -83,8 +85,8 @@ have not been tested.
 
 Press **J** or click **Shield Stun 1 / 8 / 1** in the `[` menu while aiming at an
 opponent within melee reach. Put an axe in slot 8. One press selects slot 1,
-switches to slot 8, sends one entity attack, and returns to slot 1, all in the same
-client tick. No axe-charge wait or mace is required. The key can be rebound.
+waits one tick (~50 ms), switches to slot 8 and attacks, then returns to slot 1
+on the next tick (~100 ms total). No axe-charge wait or mace is required. The key can be rebound.
 Missing axes leave your slot unchanged; active
 Lunge/Mace/Stun Slam sequences prevent this action from interfering with them.
 The attack never mines blocks. The server still decides whether the hit disables
@@ -95,9 +97,9 @@ has not been verified for this new action.
 
 Put an **axe in hotbar slot 8** and a **mace in slot 2**. Aim at a living entity
 within melee reach, then press **V** or click **Stun Slam 1 / 8 / 2** in the menu.
-The action selects slot 1, switches to the axe in slot 8 and attacks in the same
-client tick, then switches to the mace in slot 2 and attacks on the next tick
-(about 50 ms). It restores your original slot one tick later. There is no axe-charge
+The action selects slot 1, waits one tick (~50 ms), switches to the axe in slot 8
+and attacks, then waits two ticks (~100 ms) before switching to the mace in slot 2
+and attacking. It restores your original slot one tick later (~200 ms total). There is no axe-charge
 wait. Slot 1 is selected without sending an attack, preserving existing attack
 charge as far as the server permits. Each press runs one sequence.
 
