@@ -110,6 +110,11 @@ public final class RasmClient implements ClientModInitializer {
             return;
         }
         if (turn.active()) return;
+        // Capture the intended opponent before rotating away. Picking only after
+        // the turn loses a front-facing target and produces ordinary rear hits.
+        client.gameRenderer.pick(1.0F);
+        Entity aimedTarget = client.hitResult instanceof EntityHitResult aimed
+            && aimed.getEntity() instanceof LivingEntity ? aimed.getEntity() : null;
         if (turn.start(client.player.getYRot())) {
             turningPlayer = client.player; turnLevel = client.level;
             client.player.setYRot(turn.turnedYaw());
@@ -129,6 +134,7 @@ public final class RasmClient implements ClientModInitializer {
                 }
             }
             if (best != null) target = best;
+            if (aimedTarget != null) target = aimedTarget;
             // Synchronize sprint and the flick yaw before the attack packet, all in this tick.
             client.player.connection.send(new ServerboundPlayerCommandPacket(client.player,
                 client.player.isSprinting() ? ServerboundPlayerCommandPacket.Action.START_SPRINTING

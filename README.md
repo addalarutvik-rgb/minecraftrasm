@@ -20,7 +20,7 @@ requires Fabric Loader, Fabric API, and Rasm on your own client.
 | Z | One lunge swap (slots 1 / 3) |
 | X | One mace swap (slots 1 / 2) |
 | B | Add a ghost block under your feet |
-| V | Stun Slam: axe in slot 8 → mace in slot 2 |
+| V | Stun Slam: slot 1 → axe 8 → mace 2 |
 | H | Toggle ore X-ray |
 
 Change every action binding in **Options → Controls → Key Binds → Rasm Client**,
@@ -33,8 +33,10 @@ sends the new facing, and sends an **entity attack in the same client tick**. It
 returns by -180 degrees on the following tick (about 50 ms). There is no delayed
 hit after returning. No block-click/mining action is sent.
 
-It prefers an in-reach player in the rear cone; otherwise a living entity under
-the backward crosshair can be hit. Reach and line of sight are checked at the hit.
+It first locks the living entity under your crosshair **before** turning, then
+attacks that same target with the reversed facing. Aim at your opponent and press R.
+If there is no aimed target, it falls back to an in-reach player in the rear cone
+or a living entity under the backward crosshair. Reach and line of sight are checked at the hit.
 If no target qualifies, it only turns out and back. Pitch is preserved.
 
 For bonus knockback, sprint before triggering R with a charged attack, or use a
@@ -72,23 +74,18 @@ have not been tested.
 ## Stun Slam
 
 Put an **axe in hotbar slot 8** and a **mace in slot 2**. Aim at a living entity
-within melee reach, then press **V** or click **Stun Slam 8 / 2** in the menu.
-The action selects the axe, waits for at least 90% attack charge (up to two
-seconds), attacks, switches to
-the mace and attacks on the next tick, then restores the slot you started with.
-It runs once per press; presses during another swap are ignored. V can be rebound.
+within melee reach, then press **V** or click **Stun Slam 1 / 8 / 2** in the menu.
+The action selects slot 1, switches to the axe in slot 8 and attacks in the same
+client tick, then switches to the mace in slot 2 and attacks on the next tick
+(about 50 ms). It restores your original slot one tick later. There is no axe-charge
+wait. Slot 1 is selected without sending an attack, preserving existing attack
+charge as far as the server permits. Each press runs one sequence.
 
-Both hits use the selected entity, not a block click. Missing weapons, no target,
-a target leaving reach/line of sight, death, opening a screen, or a world change
-cancel the action. It does not make you jump or create fall distance: use it while
-falling if you want a mace smash. Shield disabling, cooldowns, invulnerability
-frames, and damage are still decided by Minecraft and the server.
-
-The [provided tutorial](https://www.youtube.com/watch?v=ttkeMY68JwU) was blocked by
-this environment, so exact equivalence to its timing has not been verified.
-Local testing confirmed a charged hit on an iron golem and restoration of the
-original fifth slot. Actual PvP shield-disable and falling-smash behavior remain
-unverified.
+Both attacks target the aimed living entity and check range, line of sight, and
+whether it is alive. This never sends a block-mining click. Put a low-cooldown item
+in slot 1. Fast switching does not guarantee bypassing server cooldowns, shield
+disabling, or smash damage; falling distance and server combat rules still apply.
+The revised fast sequence and front-target KB displacement need live PvP testing.
 
 ## Entity glow
 

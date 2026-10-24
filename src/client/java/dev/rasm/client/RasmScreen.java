@@ -30,7 +30,7 @@ final class RasmScreen extends Screen {
         ghost.setTooltip(Tooltip.create(Component.literal("Places one client-only full glass block under your feet, in air. Repeat to place more; /ghost clear removes all.")));
         flight = button("Flight", x, y + 56, half, () -> controls.toggleFlight(Minecraft.getInstance()));
         nofall = button("Nofall", x + half + 6, y + 56, half, () -> NoFall.toggle(Minecraft.getInstance()));
-        button("Stun Slam 8 / 2", x, y + 88, half, () -> {
+        button("Stun Slam 1 / 8 / 2", x, y + 88, half, () -> {
             closeForAction(); controls.swaps.stunSlam(Minecraft.getInstance());
         }).setTooltip(Tooltip.create(Component.literal("Axe in slot 8, mace in slot 2. Hits your target with each, then restores your starting slot. One press, one sequence.")));
         button("Server flight", x + half + 6, y + 88, half,

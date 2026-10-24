@@ -8,6 +8,6 @@
   "key.rasmclient.mace": "Mace swap attack (1 / 2)",
   "key.rasmclient.ghost": "Place ghost block under feet",
   "key.rasmclient.server_flight": "Request server-permitted flight",
-  "key.rasmclient.stun_slam": "Stun Slam: axe 8 to mace 2",
+  "key.rasmclient.stun_slam": "Stun Slam: slot 1 to axe 8 to mace 2",
   "key.rasmclient.xray": "Toggle ore X-ray"
 }

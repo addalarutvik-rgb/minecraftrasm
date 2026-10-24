@@ -17,14 +17,13 @@ final class SwapActions {
     private boolean mace;
     private boolean stun;
     private int returnSlot;
-    private int stunChargeTicks;
     private LivingEntity stunTarget;
     private int phase;
     private int delay;
     private LocalPlayer owner;
     private ClientLevel level;
     boolean lungeActive() { return lunge; }
-    void stop() { lunge = false; mace = false; stun = false; stunTarget = null; stunChargeTicks = 0; phase = 0; delay = 0; owner = null; level = null; }
+    void stop() { lunge = false; mace = false; stun = false; stunTarget = null; phase = 0; delay = 0; owner = null; level = null; }
     void lunge(Minecraft client) {
         if (lunge || mace || stun) return;
         if (!ready(client)) return;
@@ -54,6 +53,7 @@ final class SwapActions {
         stop(); owner = client.player; level = client.level; stun = true;
         returnSlot = owner.getInventory().getSelectedSlot();
         stunTarget = target;
+        tick(client); // Start the slot-1/axe sequence on the keypress itself.
     }
 
     private boolean ready(Minecraft client) { return client.player != null && client.gameMode != null && client.player.isAlive(); }
@@ -70,16 +70,13 @@ final class SwapActions {
         }
         if (delay-- > 0) return;
         if (phase == 0) {
-            select(client, stun ? 7 : 0); phase = 1;
+            select(client, 0);
+            if (stun) {
+                select(client, 7);
+                attack(client);
+                phase = 2; // Mace on the next tick, without waiting for axe charge.
+            } else phase = 1;
         } else if (phase == 1) {
-            if (stun && owner.getInventory().getSelectedSlot() != 7) { restore(client); stop(); return; }
-            if (stun && owner.getAttackStrengthScale(0) < 0.9F) {
-                if (++stunChargeTicks > 40) {
-                    message(client, "Stun Slam cancelled: axe attack did not charge in time.");
-                    restore(client); stop();
-                }
-                return;
-            }
             attack(client); phase = 2;
             if (lunge) delay = 4; // Recover the fast item before changing to the spear.
         } else if (phase == 2) {
