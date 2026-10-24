@@ -74,7 +74,9 @@ Opening a menu, disconnecting, dying, or changing worlds cancels a pending swap.
 ## X-ray
 
 Press **H** or click **X-ray** in the menu to hide ordinary block models and show
-ore blocks and ancient debris at full brightness. Toggle it off to rebuild normal
+ore blocks and ancient debris at full brightness. All six ore faces are enabled,
+including faces touching hidden terrain or adjacent ores. X-ray also disables
+block-state face occlusion, preserving the complete cube geometry. Toggle it off to rebuild normal
 terrain. H can be rebound, and disconnecting resets the feature. Fluids, entities,
 and special block-entity models are not hidden. Collision and mining reach are
 unchanged. Only blocks actually sent to your client can be revealed; server
@@ -287,3 +289,7 @@ blocks: they perform their turns, slot swaps, and swings without mining blocks.
 A missing, dead, or out-of-reach target does not cancel the slot sequence.
 The required axe/mace must still be in the documented slots. Combat actions
 silently skip invalid equipment and do not print chat or action-bar messages.
+
+- X-ray face-occlusion update: checked adjacent diamond/iron ores enclosed in stone
+  from above and at an angle; visible top and side faces formed complete cubes.
+  Turning X-ray off restored the enclosure. Tested with default Fabric rendering.

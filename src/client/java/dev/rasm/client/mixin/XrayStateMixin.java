@@ -2,6 +2,8 @@ package dev.rasm.client.mixin;
 
 import dev.rasm.client.Xray;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,4 +29,15 @@ public abstract class XrayStateMixin {
     private void rasm$disableOcclusion(CallbackInfoReturnable<Boolean> result) {
         if (Xray.rendering()) result.setReturnValue(false);
     }
+    // Renderers may use the state's cached occlusion shapes directly instead of
+    // Block.shouldRenderFace. Hidden terrain must not mask any face of an ore.
+    @Inject(method="canOcclude", at=@At("RETURN"), cancellable=true)
+    private void rasm$noFaceOcclusion(CallbackInfoReturnable<Boolean> result) {
+        if (Xray.rendering()) result.setReturnValue(false);
+    }
+    @Inject(method={"getOcclusionShape", "getFaceOcclusionShape"}, at=@At("RETURN"), cancellable=true)
+    private void rasm$emptyOcclusion(CallbackInfoReturnable<VoxelShape> result) {
+        if (Xray.rendering()) result.setReturnValue(Shapes.empty());
+    }
+
 }
