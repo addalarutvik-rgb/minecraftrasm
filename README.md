@@ -32,7 +32,7 @@ set **Open Rasm menu** to **[** there (or reset that binding to its new default)
 The KB flick rotates out by +180 degrees, synchronizes the current sprint state,
 sends the new facing, and sends an **entity attack in the same client tick**. It
 immediately starts Stun Slam against that same locked target: slot 1 → axe in
-slot 8 after one tick, then a mace in slot 2 two ticks after the axe hit.
+slot 8 after one tick, then a mace in slot 2 one tick after the axe hit.
 The camera returns by -180 degrees after the axe hit (about 50 ms); the mace
 follows with the slightly slower Stun Slam timing. One R press or
 **KB flick + Stun Slam** menu click runs the combination; you no longer need to
@@ -100,8 +100,8 @@ has not been verified for this new action.
 Put an **axe in hotbar slot 8** and a **mace in slot 2**. Aim at a living entity
 within melee reach, then press **V** or click **Stun Slam 1 / 8 / 2** in the menu.
 The action selects slot 1, waits one tick (~50 ms), switches to the axe in slot 8
-and attacks, then waits two ticks (~100 ms) before switching to the mace in slot 2
-and attacking. It restores your original slot one tick later (~200 ms total). There is no axe-charge
+and attacks, then waits one tick (~50 ms) before switching to the mace in slot 2
+and attacking. It restores your original slot one tick later (~150 ms total). There is no axe-charge
 wait. Slot 1 is selected without sending an attack, preserving existing attack
 charge as far as the server permits. Each press runs one sequence.
 

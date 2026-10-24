@@ -19,12 +19,11 @@ final class SwapActions {
     private int returnSlot;
     private LivingEntity stunTarget;
     private int phase;
-    private int delay;
     private LocalPlayer owner;
     private ClientLevel level;
     boolean lungeActive() { return lunge; }
     boolean active() { return lunge || mace || stun || shield; }
-    void stop() { lunge = false; mace = false; stun = false; shield = false; stunTarget = null; phase = 0; delay = 0; owner = null; level = null; }
+    void stop() { lunge = false; mace = false; stun = false; shield = false; stunTarget = null; phase = 0; owner = null; level = null; }
     void lunge(Minecraft client) {
         if (active()) return;
         if (!ready(client)) return;
@@ -84,7 +83,6 @@ final class SwapActions {
                 || stun && !owner.getInventory().getItem(1).is(Items.MACE))) {
             restore(client); stop(); return;
         }
-        if (delay-- > 0) return;
         if (phase == 0) {
             select(client, 0);
             phase = lunge ? 2 : 1; // Lunge skips the slot-1 attack entirely.
@@ -93,7 +91,7 @@ final class SwapActions {
                 select(client, 7);
                 attack(client);
                 phase = shield ? 3 : 2;
-                if (stun) delay = 1; // Two ticks (~100 ms) from axe hit to mace hit.
+                // Advance to the mace on the next tick (~50 ms after the axe hit).
             } else {
                 attack(client); phase = 2;
             }
