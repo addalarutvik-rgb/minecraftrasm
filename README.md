@@ -36,7 +36,7 @@ slot 8, then a mace in slot 2 on the following tick. The mace attack runs before
 the camera returns by -180 degrees on that tick (about 50 ms). One R press or
 **KB flick + Stun Slam** menu click runs the combination; you no longer need to
 press both buttons. Put an axe in slot 8 and a mace in slot 2. Without those items,
-the ordinary flick hit still runs and a message explains what is missing.
+the ordinary flick still runs and the swap is silently skipped.
 Active swap sequences block a new flick. No block-click/mining action is sent.
 This automates the user's reported working combination; multiplayer displacement
 with the combined button has not been verified here.
@@ -45,7 +45,7 @@ It first locks the living entity under your crosshair **before** turning, then
 attacks that same target with the reversed facing. Aim at your opponent and press R.
 If there is no aimed target, it falls back to an in-reach player in the rear cone
 or a living entity under the backward crosshair. Reach and line of sight are checked at the hit.
-If no target qualifies, it only turns out and back. Pitch is preserved.
+If no target qualifies, it still turns, swings, and runs the slot sequence. Pitch is preserved.
 
 For bonus knockback, sprint before triggering R with a charged attack, or use a
 Knockback-enchanted weapon. The action preserves your sprint state; it does not
@@ -85,7 +85,7 @@ Press **J** or click **Shield Stun 1 / 8 / 1** in the `[` menu while aiming at a
 opponent within melee reach. Put an axe in slot 8. One press selects slot 1,
 switches to slot 8, sends one entity attack, and returns to slot 1, all in the same
 client tick. No axe-charge wait or mace is required. The key can be rebound.
-Missing axes or invalid/out-of-reach targets leave your slot unchanged; active
+Missing axes leave your slot unchanged; active
 Lunge/Mace/Stun Slam sequences prevent this action from interfering with them.
 The attack never mines blocks. The server still decides whether the hit disables
 a shield, based on its combat rules and attack state. Live shield-disable behavior
@@ -101,8 +101,8 @@ client tick, then switches to the mace in slot 2 and attacks on the next tick
 wait. Slot 1 is selected without sending an attack, preserving existing attack
 charge as far as the server permits. Each press runs one sequence.
 
-Both attacks target the aimed living entity and check range, line of sight, and
-whether it is alive. This never sends a block-mining click. Put a low-cooldown item
+Both attacks use the aimed living entity when it remains alive, visible, and in reach.
+Without a valid target, the sequence continues with air swings. This never sends a block-mining click. Put a low-cooldown item
 in slot 1. Fast switching does not guarantee bypassing server cooldowns, shield
 disabling, or smash damage; falling distance and server combat rules still apply.
 The revised fast sequence and front-target KB displacement need live PvP testing.
@@ -277,3 +277,11 @@ Automated movement, permission, and turn tests do not replace these interactive 
   Fabric renderer, without third-party rendering mods.
 - Player selection has unit coverage for the rear cone, range, and height; live
   multiplayer PvP behavior has not been verified.
+
+### Silent combat actions
+
+KB Flick, Stun Slam, and Shield Stun work when aiming into empty space or at
+blocks: they perform their turns, slot swaps, and swings without mining blocks.
+A missing, dead, or out-of-reach target does not cancel the slot sequence.
+The required axe/mace must still be in the documented slots. Combat actions
+silently skip invalid equipment and do not print chat or action-bar messages.

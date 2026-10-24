@@ -17,7 +17,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
@@ -108,7 +107,6 @@ public final class RasmClient implements ClientModInitializer {
     void quickTurn(Minecraft client) {
         if (client.player == null || client.gameMode == null || !client.player.isAlive()) return;
         if (client.player.isPassenger() || client.player.isSleeping()) {
-            client.player.displayClientMessage(Component.literal("Rasm: turn while standing freely."), true);
             return;
         }
         if (turn.active() || swaps.active()) return;
@@ -145,9 +143,9 @@ public final class RasmClient implements ClientModInitializer {
             if (target != null && target.isAlive() && client.player.hasLineOfSight(target)
                     && client.player.distanceToSqr(target) <= range * range) {
                 client.gameMode.attack(client.player, target);
-                client.player.swing(InteractionHand.MAIN_HAND);
-                if (target instanceof LivingEntity living) swaps.stunSlam(client, living);
             }
+            client.player.swing(InteractionHand.MAIN_HAND);
+            swaps.stunSlam(client, target instanceof LivingEntity living ? living : null);
         }
     }
 

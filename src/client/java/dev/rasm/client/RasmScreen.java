@@ -32,7 +32,7 @@ final class RasmScreen extends Screen {
         nofall = button("Nofall", x + half + 6, y + 56, half, () -> NoFall.toggle(Minecraft.getInstance()));
         button("Stun Slam 1 / 8 / 2", x, y + 88, half, () -> {
             closeForAction(); controls.swaps.stunSlam(Minecraft.getInstance());
-        }).setTooltip(Tooltip.create(Component.literal("Axe in slot 8, mace in slot 2. Hits your target with each, then restores your starting slot. One press, one sequence.")));
+        }).setTooltip(Tooltip.create(Component.literal("Axe in slot 8, mace in slot 2. Hits your target with each, then restores your starting slot. Works without a target; one press, one sequence.")));
         button("Server flight", x + half + 6, y + 88, half,
             () -> controls.requestServerFlight(Minecraft.getInstance()));
         xray = button("X-ray", x, y + 116, half, () -> Xray.toggle(Minecraft.getInstance()));
@@ -40,7 +40,7 @@ final class RasmScreen extends Screen {
             () -> Minecraft.getInstance().setScreen(new KeyBindsScreen(this, Minecraft.getInstance().options)));
         button("Shield Stun 1 / 8 / 1", x, y + 144, half, () -> {
             closeForAction(); controls.swaps.shieldStun(Minecraft.getInstance());
-        }).setTooltip(Tooltip.create(Component.literal("Axe in slot 8. Selects 1, attacks with 8, returns to 1 immediately. Aim at an opponent.")));
+        }).setTooltip(Tooltip.create(Component.literal("Axe in slot 8. Selects 1, attacks with 8, returns to 1 immediately. Swings in air when no target is available.")));
         button("Done", x + half + 6, y + 144, half, this::onClose);
     }
     private void closeForAction() { Minecraft.getInstance().setScreen(null); }

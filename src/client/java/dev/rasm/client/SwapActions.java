@@ -4,7 +4,6 @@ import dev.rasm.client.mixin.MinecraftAttackInvoker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
@@ -29,7 +28,7 @@ final class SwapActions {
         if (lunge || mace || stun) return;
         if (!ready(client)) return;
         if (!client.player.getInventory().getItem(2).is(ItemTags.SPEARS)) {
-            message(client, "Put a Lunge-enchanted spear in slot 3 and a low-cooldown item in slot 1."); return;
+            return;
         }
         stop(); owner = client.player; level = client.level; lunge = true;
     }
@@ -37,16 +36,15 @@ final class SwapActions {
         if (lunge || mace || stun) return;
         if (!ready(client)) return;
         if (!client.player.getInventory().getItem(1).is(Items.MACE)) {
-            message(client, "Put your first weapon in slot 1 and a mace in slot 2."); return;
+            return;
         }
         stop(); owner = client.player; level = client.level; mace = true;
     }
     void stunSlam(Minecraft client) {
         if (lunge || mace || stun || !ready(client)) return;
         client.gameRenderer.pick(1.0F);
-        if (!(client.hitResult instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity target)) {
-            message(client, "Aim at an entity within melee reach to Stun Slam."); return;
-        }
+        LivingEntity target = client.hitResult instanceof EntityHitResult hit
+            && hit.getEntity() instanceof LivingEntity living ? living : null;
         stunSlam(client, target);
     }
 
@@ -55,7 +53,7 @@ final class SwapActions {
         if (active() || !ready(client) || client.screen != null) return;
         if (!client.player.getInventory().getItem(7).is(ItemTags.AXES)
                 || !client.player.getInventory().getItem(1).is(Items.MACE)) {
-            message(client, "Stun Slam needs an axe in slot 8 and a mace in slot 2."); return;
+            return;
         }
         stop(); owner = client.player; level = client.level; stun = true;
         returnSlot = owner.getInventory().getSelectedSlot();
@@ -66,21 +64,16 @@ final class SwapActions {
     void shieldStun(Minecraft client) {
         if (lunge || mace || stun || !ready(client) || client.screen != null) return;
         if (!client.player.getInventory().getItem(7).is(ItemTags.AXES)) {
-            message(client, "Shield Stun needs an axe in slot 8."); return;
+            return;
         }
         client.gameRenderer.pick(1.0F);
-        if (!(client.hitResult instanceof EntityHitResult hit)
-                || !(hit.getEntity() instanceof LivingEntity target)
-                || !target.isAlive() || !client.player.hasLineOfSight(target)
-                || client.player.distanceToSqr(target) > Math.pow(client.player.entityInteractionRange(), 2)) {
-            message(client, "Aim at an entity within melee reach to Shield Stun."); return;
-        }
+        LivingEntity target = client.hitResult instanceof EntityHitResult hit
+            && hit.getEntity() instanceof LivingEntity living ? living : null;
         // Ordered slot/attack packets in one tick; never issue a mining click.
         select(client, 0);
         try {
             select(client, 7);
-            client.gameMode.attack(client.player, target);
-            client.player.swing(InteractionHand.MAIN_HAND);
+            entityAttackOrSwing(client, target);
         } finally {
             select(client, 0);
         }
@@ -92,10 +85,7 @@ final class SwapActions {
         if (!ready(client) || owner != client.player || level != client.level) { stop(); return; }
         if (client.screen != null) { restore(client); stop(); return; }
         if (stun && (!owner.getInventory().getItem(7).is(ItemTags.AXES)
-                || !owner.getInventory().getItem(1).is(Items.MACE)
-                || stunTarget == null || !stunTarget.isAlive()
-                || stunTarget.level() != level || !owner.hasLineOfSight(stunTarget)
-                || owner.distanceToSqr(stunTarget) > Math.pow(owner.entityInteractionRange(), 2))) {
+                || !owner.getInventory().getItem(1).is(Items.MACE))) {
             restore(client); stop(); return;
         }
         if (delay-- > 0) return;
@@ -125,9 +115,16 @@ final class SwapActions {
     }
     private void attack(Minecraft client) {
         if (stun) {
-            client.gameMode.attack(owner, stunTarget);
-            owner.swing(InteractionHand.MAIN_HAND);
+            entityAttackOrSwing(client, stunTarget);
         } else click(client);
+    }
+    private void entityAttackOrSwing(Minecraft client, LivingEntity target) {
+        if (target != null && target.isAlive() && target.level() == client.level
+                && client.player.hasLineOfSight(target)
+                && client.player.distanceToSqr(target) <= Math.pow(client.player.entityInteractionRange(), 2)) {
+            client.gameMode.attack(client.player, target);
+        }
+        client.player.swing(InteractionHand.MAIN_HAND);
     }
     private void click(Minecraft client) {
         client.gameRenderer.pick(1.0F);
@@ -135,5 +132,4 @@ final class SwapActions {
         attack.rasm$clearMissTime(0);
         attack.rasm$startAttack();
     }
-    private void message(Minecraft client, String text) { client.player.displayClientMessage(Component.literal("Rasm: " + text), false); }
 }
