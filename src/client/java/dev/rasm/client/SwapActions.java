@@ -23,6 +23,7 @@ final class SwapActions {
     private LocalPlayer owner;
     private ClientLevel level;
     boolean lungeActive() { return lunge; }
+    boolean active() { return lunge || mace || stun; }
     void stop() { lunge = false; mace = false; stun = false; stunTarget = null; phase = 0; delay = 0; owner = null; level = null; }
     void lunge(Minecraft client) {
         if (lunge || mace || stun) return;
@@ -42,13 +43,19 @@ final class SwapActions {
     }
     void stunSlam(Minecraft client) {
         if (lunge || mace || stun || !ready(client)) return;
-        if (!client.player.getInventory().getItem(7).is(ItemTags.AXES)
-                || !client.player.getInventory().getItem(1).is(Items.MACE)) {
-            message(client, "Stun Slam needs an axe in slot 8 and a mace in slot 2."); return;
-        }
         client.gameRenderer.pick(1.0F);
         if (!(client.hitResult instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity target)) {
             message(client, "Aim at an entity within melee reach to Stun Slam."); return;
+        }
+        stunSlam(client, target);
+    }
+
+    // Reuse the flick's locked target instead of raycasting after its camera turn.
+    void stunSlam(Minecraft client, LivingEntity target) {
+        if (active() || !ready(client) || client.screen != null) return;
+        if (!client.player.getInventory().getItem(7).is(ItemTags.AXES)
+                || !client.player.getInventory().getItem(1).is(Items.MACE)) {
+            message(client, "Stun Slam needs an axe in slot 8 and a mace in slot 2."); return;
         }
         stop(); owner = client.player; level = client.level; stun = true;
         returnSlot = owner.getInventory().getSelectedSlot();

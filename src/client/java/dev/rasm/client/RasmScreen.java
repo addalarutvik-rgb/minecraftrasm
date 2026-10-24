@@ -19,7 +19,7 @@ final class RasmScreen extends Screen {
         left = (width - panelWidth) / 2;
         top = Math.max(2, (height - 242) / 2);
         int x = left + 12, y = top + 46, half = (panelWidth - 30) / 2;
-        button("KB flick + hit", x, y, half, () -> { closeForAction(); controls.quickTurn(Minecraft.getInstance()); });
+        button("KB flick + Stun Slam", x, y, half, () -> { closeForAction(); controls.quickTurn(Minecraft.getInstance()); });
         button("Lunge swap 1 / 3", x + half + 6, y, half, () -> {
             closeForAction(); controls.swaps.lunge(Minecraft.getInstance());
         }).setTooltip(Tooltip.create(Component.literal("Slot 1: low-cooldown item. Slot 3: Lunge spear. One sequence per press.")));

@@ -111,7 +111,7 @@ public final class RasmClient implements ClientModInitializer {
             client.player.displayClientMessage(Component.literal("Rasm: turn while standing freely."), true);
             return;
         }
-        if (turn.active()) return;
+        if (turn.active() || swaps.active()) return;
         // Capture the intended opponent before rotating away. Picking only after
         // the turn loses a front-facing target and produces ordinary rear hits.
         client.gameRenderer.pick(1.0F);
@@ -146,6 +146,7 @@ public final class RasmClient implements ClientModInitializer {
                     && client.player.distanceToSqr(target) <= range * range) {
                 client.gameMode.attack(client.player, target);
                 client.player.swing(InteractionHand.MAIN_HAND);
+                if (target instanceof LivingEntity living) swaps.stunSlam(client, living);
             }
         }
     }

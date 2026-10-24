@@ -1,7 +1,7 @@
 {
   "key.category.rasmclient.controls": "Rasm Client",
   "key.rasmclient.menu": "Open Rasm menu",
-  "key.rasmclient.flip": "KB flick: same-tick hit and return",
+  "key.rasmclient.flip": "KB flick + immediate Stun Slam",
   "key.rasmclient.flight": "Toggle client flight",
   "key.rasmclient.nofall": "Toggle Nofall",
   "key.rasmclient.lunge": "Lunge swap once (1 / 3)",

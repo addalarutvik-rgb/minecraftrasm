@@ -14,7 +14,7 @@ requires Fabric Loader, Fabric API, and Rasm on your own client.
 | Default key | Action |
 | --- | --- |
 | `[` | Open the Rasm Client menu |
-| R | KB flick: turn 180°, attack that tick, then return |
+| R | KB flick + immediate Stun Slam |
 | G | Toggle client-side flight |
 | N | Toggle Nofall |
 | Z | One lunge swap (slots 1 / 3) |
@@ -31,8 +31,15 @@ If upgrading from an older build, Minecraft may retain the previous menu key;
 set **Open Rasm menu** to **[** there (or reset that binding to its new default).
 The KB flick rotates out by +180 degrees, synchronizes the current sprint state,
 sends the new facing, and sends an **entity attack in the same client tick**. It
-returns by -180 degrees on the following tick (about 50 ms). There is no delayed
-hit after returning. No block-click/mining action is sent.
+immediately starts Stun Slam against that same locked target: slot 1 → axe in
+slot 8, then a mace in slot 2 on the following tick. The mace attack runs before
+the camera returns by -180 degrees on that tick (about 50 ms). One R press or
+**KB flick + Stun Slam** menu click runs the combination; you no longer need to
+press both buttons. Put an axe in slot 8 and a mace in slot 2. Without those items,
+the ordinary flick hit still runs and a message explains what is missing.
+Active swap sequences block a new flick. No block-click/mining action is sent.
+This automates the user's reported working combination; multiplayer displacement
+with the combined button has not been verified here.
 
 It first locks the living entity under your crosshair **before** turning, then
 attacks that same target with the reversed facing. Aim at your opponent and press R.
