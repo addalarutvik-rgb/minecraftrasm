@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "rasmclient",
+  "version": "${version}",
+  "name": "Rasm Client",
+  "description": "Quick-turn controls, client-side flight, and optional server-permitted flight.",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "dev.rasm.client.RasmClient"
+    ],
+    "main": [
+      "dev.rasm.flight.RasmMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.17.3",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
