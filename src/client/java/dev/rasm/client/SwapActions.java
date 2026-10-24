@@ -56,6 +56,29 @@ final class SwapActions {
         tick(client); // Start the slot-1/axe sequence on the keypress itself.
     }
 
+    void shieldStun(Minecraft client) {
+        if (lunge || mace || stun || !ready(client) || client.screen != null) return;
+        if (!client.player.getInventory().getItem(7).is(ItemTags.AXES)) {
+            message(client, "Shield Stun needs an axe in slot 8."); return;
+        }
+        client.gameRenderer.pick(1.0F);
+        if (!(client.hitResult instanceof EntityHitResult hit)
+                || !(hit.getEntity() instanceof LivingEntity target)
+                || !target.isAlive() || !client.player.hasLineOfSight(target)
+                || client.player.distanceToSqr(target) > Math.pow(client.player.entityInteractionRange(), 2)) {
+            message(client, "Aim at an entity within melee reach to Shield Stun."); return;
+        }
+        // Ordered slot/attack packets in one tick; never issue a mining click.
+        select(client, 0);
+        try {
+            select(client, 7);
+            client.gameMode.attack(client.player, target);
+            client.player.swing(InteractionHand.MAIN_HAND);
+        } finally {
+            select(client, 0);
+        }
+    }
+
     private boolean ready(Minecraft client) { return client.player != null && client.gameMode != null && client.player.isAlive(); }
     void tick(Minecraft client) {
         if (!lunge && !mace && !stun) return;

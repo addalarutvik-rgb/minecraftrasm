@@ -22,6 +22,7 @@ requires Fabric Loader, Fabric API, and Rasm on your own client.
 | B | Add a ghost block under your feet |
 | V | Stun Slam: slot 1 → axe 8 → mace 2 |
 | H | Toggle ore X-ray |
+| J | Shield Stun: slot 1 → axe 8 → slot 1 |
 
 Change every action binding in **Options → Controls → Key Binds → Rasm Client**,
 or click **Rebind keys** in the Rasm menu. Server-permitted flight is unbound by
@@ -70,6 +71,18 @@ and special block-entity models are not hidden. Collision and mining reach are
 unchanged. Only blocks actually sent to your client can be revealed; server
 anti-X-ray can conceal ores or send fake ore data. Third-party rendering mods
 have not been tested.
+
+## Shield Stun
+
+Press **J** or click **Shield Stun 1 / 8 / 1** in the `[` menu while aiming at an
+opponent within melee reach. Put an axe in slot 8. One press selects slot 1,
+switches to slot 8, sends one entity attack, and returns to slot 1, all in the same
+client tick. No axe-charge wait or mace is required. The key can be rebound.
+Missing axes or invalid/out-of-reach targets leave your slot unchanged; active
+Lunge/Mace/Stun Slam sequences prevent this action from interfering with them.
+The attack never mines blocks. The server still decides whether the hit disables
+a shield, based on its combat rules and attack state. Live shield-disable behavior
+has not been verified for this new action.
 
 ## Stun Slam
 

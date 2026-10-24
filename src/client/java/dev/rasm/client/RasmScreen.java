@@ -38,7 +38,10 @@ final class RasmScreen extends Screen {
         xray = button("X-ray", x, y + 116, half, () -> Xray.toggle(Minecraft.getInstance()));
         button("Rebind keys", x + half + 6, y + 116, half,
             () -> Minecraft.getInstance().setScreen(new KeyBindsScreen(this, Minecraft.getInstance().options)));
-        button("Done", x, y + 144, panelWidth - 24, this::onClose);
+        button("Shield Stun 1 / 8 / 1", x, y + 144, half, () -> {
+            closeForAction(); controls.swaps.shieldStun(Minecraft.getInstance());
+        }).setTooltip(Tooltip.create(Component.literal("Axe in slot 8. Selects 1, attacks with 8, returns to 1 immediately. Aim at an opponent.")));
+        button("Done", x + half + 6, y + 144, half, this::onClose);
     }
     private void closeForAction() { Minecraft.getInstance().setScreen(null); }
     private Button button(String label, int x, int y, int w, Runnable action) {

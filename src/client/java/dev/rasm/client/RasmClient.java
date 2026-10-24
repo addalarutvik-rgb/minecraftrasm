@@ -28,7 +28,7 @@ public final class RasmClient implements ClientModInitializer {
     private ClientLevel turnLevel;
     final SwapActions swaps = new SwapActions();
     final GhostBlock ghost = new GhostBlock();
-    private KeyMapping noFallKey, lungeKey, maceKey, ghostKey, serverFlightKey, stunKey, xrayKey;
+    private KeyMapping noFallKey, lungeKey, maceKey, ghostKey, serverFlightKey, stunKey, xrayKey, shieldStunKey;
     private KeyMapping menuKey;
     private KeyMapping flipKey;
     private KeyMapping flightKey;
@@ -43,6 +43,7 @@ public final class RasmClient implements ClientModInitializer {
         lungeKey = key("lunge", GLFW.GLFW_KEY_Z, category);
         maceKey = key("mace", GLFW.GLFW_KEY_X, category);
         stunKey = key("stun_slam", GLFW.GLFW_KEY_V, category);
+        shieldStunKey = key("shield_stun", GLFW.GLFW_KEY_J, category);
         xrayKey = key("xray", GLFW.GLFW_KEY_H, category);
         ghostKey = key("ghost", GLFW.GLFW_KEY_B, category);
         serverFlightKey = key("server_flight", GLFW.GLFW_KEY_UNKNOWN, category);
@@ -91,6 +92,7 @@ public final class RasmClient implements ClientModInitializer {
         while (maceKey.consumeClick()) swaps.mace(client);
         while (xrayKey.consumeClick()) Xray.toggle(client);
         while (stunKey.consumeClick()) swaps.stunSlam(client);
+        while (shieldStunKey.consumeClick()) swaps.shieldStun(client);
         while (ghostKey.consumeClick()) ghost.place(client);
         while (serverFlightKey.consumeClick()) requestServerFlight(client);
     }
@@ -99,7 +101,7 @@ public final class RasmClient implements ClientModInitializer {
         while (menuKey.consumeClick()) { }
         while (flipKey.consumeClick()) { }
         while (flightKey.consumeClick()) { }
-        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey,xrayKey})
+        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey,xrayKey,shieldStunKey})
             while (key.consumeClick()) { }
     }
 
