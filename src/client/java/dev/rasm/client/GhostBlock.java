@@ -1,5 +1,9 @@
 package dev.rasm.client;
 
+import java.util.HashMap;
+import java.util.Map;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -11,29 +15,36 @@ import net.minecraft.world.level.block.state.BlockState;
 final class GhostBlock {
     private ClientLevel level;
     private LocalPlayer owner;
-    private BlockPos position;
-    private BlockState original;
-    boolean active() { return position != null; }
+    private final Map<BlockPos, BlockState> blocks = new HashMap<>();
+    int count() { return blocks.size(); }
+    void register() {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> dispatcher.register(
+            literal("ghost").then(literal("clear").executes(context -> {
+                int removed = count(); clear();
+                context.getSource().sendFeedback(Component.literal("Rasm: cleared " + removed + " ghost blocks."));
+                return removed;
+            }))));
+    }
     void clear() {
-        if (position != null && level.getBlockState(position).is(Blocks.GLASS))
-            level.setBlock(position, original, 3);
-        level = null; owner = null; position = null; original = null;
+        if (level != null) blocks.forEach((pos, original) -> {
+            if (level.getBlockState(pos).is(Blocks.GLASS)) level.setBlock(pos, original, 3);
+        });
+        blocks.clear(); level = null; owner = null;
     }
     void tick(Minecraft client) {
-        if (active() && (client.level != level || client.player != owner || !owner.isAlive())) clear();
-        else if (active() && !level.getBlockState(position).is(Blocks.GLASS)) {
-            level = null; owner = null; position = null; original = null;
-        }
+        if (level != null && (client.level != level || client.player != owner || !owner.isAlive())) clear();
+        else if (level != null) blocks.keySet().removeIf(pos -> !level.getBlockState(pos).is(Blocks.GLASS));
     }
-    void toggle(Minecraft client) {
-        if (active()) { clear(); return; }
+    void place(Minecraft client) {
+        tick(client);
         if (client.player == null || client.level == null) return;
         BlockPos at = BlockPos.containing(client.player.getX(), client.player.getBoundingBox().minY - 1, client.player.getZ());
         if (!client.level.getBlockState(at).isAir()) {
-            client.player.displayClientMessage(Component.literal("Rasm: jump or move above air to place a ghost block under your feet."), true);
+            client.player.displayClientMessage(Component.literal("Rasm: move above an empty space to place another ghost block."), true);
             return;
         }
-        level = client.level; owner = client.player; position = at; original = level.getBlockState(at);
-        level.setBlock(position, Blocks.GLASS.defaultBlockState(), 3);
+        level = client.level; owner = client.player;
+        blocks.put(at, level.getBlockState(at));
+        level.setBlock(at, Blocks.GLASS.defaultBlockState(), 3);
     }
 }

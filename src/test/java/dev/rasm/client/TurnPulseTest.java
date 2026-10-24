@@ -4,12 +4,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TurnPulseTest {
-    @Test void returnsAfterTwoTicksAlongTheSameUnwrappedArc() {
+    @Test void returnsAfterOneTickAlongTheSameUnwrappedArc() {
         for (float yaw : new float[]{0, 179, -179, 720, -900}) {
             TurnPulse pulse = new TurnPulse();
             assertTrue(pulse.start(yaw));
             assertEquals(180, pulse.turnedYaw() - yaw);
-            assertFalse(pulse.tick());
             assertTrue(pulse.tick());
             assertEquals(-180, pulse.originalYaw() - pulse.turnedYaw());
             assertFalse(pulse.tick());

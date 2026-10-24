@@ -4,8 +4,8 @@
   "key.rasmclient.flip": "Quick 180 turn and return",
   "key.rasmclient.flight": "Toggle client flight",
   "key.rasmclient.nofall": "Toggle Nofall",
-  "key.rasmclient.lunge": "Toggle lunge swapping (1 / 3)",
-  "key.rasmclient.mace": "Mace swap attack (1 / 3)",
-  "key.rasmclient.ghost": "Toggle ghost block under feet",
+  "key.rasmclient.lunge": "Lunge swap once (1 / 3)",
+  "key.rasmclient.mace": "Mace swap attack (1 / 2)",
+  "key.rasmclient.ghost": "Place ghost block under feet",
   "key.rasmclient.server_flight": "Request server-permitted flight"
 }

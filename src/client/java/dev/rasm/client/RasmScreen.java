@@ -21,13 +21,13 @@ final class RasmScreen extends Screen {
         int x = left + 12, y = top + 46, half = (panelWidth - 30) / 2;
         button("180 turn + attack", x, y, half, () -> { closeForAction(); controls.quickTurn(Minecraft.getInstance()); });
         button("Lunge swap 1 / 3", x + half + 6, y, half, () -> {
-            closeForAction(); controls.swaps.toggleLunge(Minecraft.getInstance());
-        }).setTooltip(Tooltip.create(Component.literal("Slot 1: low-cooldown item. Slot 3: Lunge spear. Repeats until toggled off or a menu opens.")));
-        button("Mace swap 1 / 3", x, y + 28, half, () -> {
+            closeForAction(); controls.swaps.lunge(Minecraft.getInstance());
+        }).setTooltip(Tooltip.create(Component.literal("Slot 1: low-cooldown item. Slot 3: Lunge spear. One sequence per press.")));
+        button("Mace swap 1 / 2", x, y + 28, half, () -> {
             closeForAction(); controls.swaps.mace(Minecraft.getInstance());
-        }).setTooltip(Tooltip.create(Component.literal("Attacks with slot 1, switches to a mace in slot 3, attacks, then returns to slot 1.")));
-        ghost = button("Ghost block", x + half + 6, y + 28, half, () -> controls.ghost.toggle(Minecraft.getInstance()));
-        ghost.setTooltip(Tooltip.create(Component.literal("Places one client-only full glass block under your feet, in air. Click again to remove.")));
+        }).setTooltip(Tooltip.create(Component.literal("Attacks with slot 1, switches to a mace in slot 2, attacks, then returns to slot 1.")));
+        ghost = button("Ghost block", x + half + 6, y + 28, half, () -> controls.ghost.place(Minecraft.getInstance()));
+        ghost.setTooltip(Tooltip.create(Component.literal("Places one client-only full glass block under your feet, in air. Repeat to place more; /ghost clear removes all.")));
         flight = button("Flight", x, y + 56, half, () -> controls.toggleFlight(Minecraft.getInstance()));
         nofall = button("Nofall", x + half + 6, y + 56, half, () -> NoFall.toggle(Minecraft.getInstance()));
         button("Server flight (optional)", x, y + 88, panelWidth - 24,
@@ -48,7 +48,7 @@ final class RasmScreen extends Screen {
         graphics.drawCenteredString(font, "/glow creeper   /glow off", width / 2, top + 196, 0xFF94A3B8);
         flight.setMessage(label("Flight",controls.clientFlightActive()));
         nofall.setMessage(label("Nofall",NoFall.active()));
-        ghost.setMessage(label("Ghost",controls.ghost.active()));
+        ghost.setMessage(Component.literal("Place ghost (" + controls.ghost.count() + ")"));
         super.render(graphics,mouseX,mouseY,delta);
     }
     private Component label(String text, boolean active) {

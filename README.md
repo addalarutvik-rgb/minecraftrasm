@@ -17,73 +17,61 @@ requires Fabric Loader, Fabric API, and Rasm on your own client.
 | R | Turn 180 degrees, left-click once, then return along the same arc |
 | G | Toggle client-side flight |
 | N | Toggle Nofall |
-| Z | Toggle repeated lunge swaps (slots 1 / 3) |
-| X | Perform one mace-swap sequence (slots 1 / 3) |
-| B | Place/remove a ghost block under your feet |
+| Z | One lunge swap (slots 1 / 3) |
+| X | One mace swap (slots 1 / 2) |
+| B | Add a ghost block under your feet |
 
 Change every action binding in **Options → Controls → Key Binds → Rasm Client**,
 or click **Rebind keys** in the Rasm menu. Server-permitted flight is unbound by
 default and can also be assigned a key. Minecraft saves these bindings.
 If upgrading from an older build, Minecraft may retain the previous menu key;
 set **Open Rasm menu** to **[** there (or reset that binding to its new default).
-The quick turn sends the backward facing to the server, refreshes the crosshair
-target, and performs one ordinary left click (attack/block click/air swing). It
-uses vanilla reach and attack cooldown rules. The quick turn lasts two client ticks (about 100 ms at normal speed), affects
-horizontal facing, and leaves pitch unchanged. Mouse yaw during the pulse is
-replaced by the original heading on return. It does not trigger while sleeping
-or riding. GUI screens consume hotkeys without triggering actions.
+The quick turn rotates out by +180 degrees and returns by -180 degrees after
+one client tick (about 50 ms). It prefers an in-reach player in the backward-facing
+cone, ignoring camera pitch for player selection so looking down does not select
+the ground. If no player qualifies, an entity directly under the backward
+crosshair can be selected instead. One second (20 ticks) after returning, it
+attacks the selected entity if still alive, visible, and within vanilla reach.
+It never clicks or breaks blocks. If no valid entity is found, nothing is attacked.
+Opening a screen, disconnecting, dying, or changing worlds cancels a pending hit.
 
 ## Swap actions
 
-**Lunge swapping (Z):** put a low-cooldown item or an empty hand in slot 1, and a
-Lunge-enchanted spear in slot 3. The macro left-clicks with slot 1, allows four
-additional ticks for the fast item to recover, switches to slot 3 and left-clicks,
-then returns to slot 1 and repeats. This uses the left-click variant of the
-[sequence supplied by the user](https://www.youtube.com/watch?v=8sQgOJTzkbo&t=5s).
-It does not automatically throw pearls or wind charges. Press Z again to stop;
-opening a menu or chat also stops the loop. Sufficient hunger and the Lunge
-enchantment are still required. It does not manufacture enchantments or momentum.
+**Z — Lunge swap once:** slot 1 holds your low-cooldown item (or empty hand),
+slot 3 holds a Lunge-enchanted spear. Each press selects slot 1, allows one preparation tick, clicks it, waits for its short
+cooldown, clicks with slot 3, and returns to slot 1. Press again to repeat; presses
+during an unfinished sequence are ignored. There is no automatic loop. Hunger,
+enchantments, and server mechanics still apply.
 
-**Mace swapping (X):** put your initial weapon in slot 1 and a mace in slot 3.
-The action clicks with slot 1, switches to slot 3 and clicks on the following
-tick, then returns to slot 1. Aim at a target within normal reach. This sequence
-alone does not create fall distance or guarantee a smash/extra damage; cooldown,
-invulnerability frames, and server mechanics still apply. The button performs
-one sequence per press. It is separate from continuous lunge swapping.
+**X — Mace swap once:** slot 1 holds your initial weapon and **slot 2** holds the
+mace. It attacks with slot 1, changes to slot 2 for a second attack, and returns
+to slot 1. It does not create fall distance or guarantee extra damage.
 
-Both actions validate the item in slot 3 and stop on disconnect or player changes.
-The adjusted lunge timing was tested locally with an empty slot 1 and Lunge III
-in slot 3: it moved the player roughly nine blocks in two seconds without movement
-keys. The mace action returned to slot 1 and damaged a target, but an extra-damage
-or smash advantage has not been verified.
-
-No code from other clients is bundled. For terminology research, the
-[Wurst AttributeSwap description](https://github.com/Wurst-Imperium/Wurst7/blob/master/src/main/java/net/wurstclient/hacks/AttributeSwapHack.java)
-was consulted; it also describes a different swap-on-attack style of mace swapping.
+Opening a menu, disconnecting, dying, or changing worlds cancels a pending swap.
 
 ## Entity glow
 
-`/glow creeper` adds a local outline to loaded creepers. Any registered entity type
-is accepted, including namespaced IDs such as `/glow minecraft:zombie`.
-A new command replaces the previous type filter. `/glow off` clears it; disconnect
-also clears it. Existing vanilla glowing effects remain unchanged. This is a
-client command and does not add a status effect or alter mobs on the server.
-Unloaded entities cannot be revealed. Local testing confirmed that creepers
-received an outline while a nearby cow did not; invalid entity names were rejected.
+Filters stack: `/glow slime` followed by `/glow creeper` highlights both types.
+`/glow @a` or `/glow players` adds all loaded players. `/glow hostile` adds mobs
+in Minecraft's MONSTER category; `/glow passive` adds other mobs (including neutral
+animals; this is a type category, not their current aggression state).
 
-## Ghost block
+For an exclusive selection, use `/glow only hostile`, `/glow only passive`, or
+`/glow only players`. `/glow only creeper` also works. `/glow clear` and `/glow off`
+remove all custom filters. Vanilla glow is preserved. Filters reset on disconnect.
+These commands run locally and only affect entities loaded by the client.
 
-Press B or use **Ghost** in the menu to create one full glass block in an air cell
-directly under your feet. Jump or move above air first; real blocks are never
-replaced. Press again to remove it. The block exists only in the client world,
-including local collision; the server still sees air and may correct your position.
-A local test displayed the glass cube while a server-side block check still
-reported air. It stays at the placement location rather than following your feet. Changing
-worlds, respawning, or disconnecting clears the local block.
+## Ghost blocks
 
-The linked [Ghostblock Modrinth project](https://modrinth.com/mod/ghostblock) could
-not be fetched from this environment. This feature implements the requested
-full block underfoot; compatibility/equivalence with that project is unverified.
+Every press of **B** or **Place ghost** adds another full client-only glass block
+under your feet, provided that cell is air. Move or jump to place more blocks;
+existing ghost blocks stay in place. The menu displays the tracked block count.
+**`/ghost clear` removes every tracked ghost block.** Respawning, disconnecting,
+or changing worlds also clears them. Real blocks are never replaced, and server
+block updates can remove the local illusion. The server still sees air.
+
+The linked [Ghostblock project](https://modrinth.com/mod/ghostblock) could not be
+fetched from this environment; this implements the requested behavior directly.
 
 ## Client-side flight
 
@@ -172,8 +160,8 @@ Tests: `./gradlew test`. The wrapper verifies Gradle's SHA-256 checksum.
 ## Validation
 
 `./gradlew build` succeeded and produced the remapped client/server JAR. All
-15 JUnit tests passed (five movement tests, four permission tests, three
-turn-state tests, and three NoFall selection tests).
+18 JUnit tests passed (five movement tests, four permission tests, three
+turn-state tests, three NoFall selection tests, and three backward target-selection tests).
 The dedicated-server launch loaded Rasm in the server environment and stopped
 at Minecraft's EULA gate (`run/eula.txt` remains `eula=false`).
 
@@ -190,7 +178,8 @@ Use a disposable world and a test Fabric server:
 
 - Verify the compact menu, live Flight/Nofall ON/OFF states, and rebinding.
 - Place a target behind the player within vanilla reach; confirm R turns, sends
-  exactly one left click at that target, and returns. Also check air and block clicks.
+  returns, then sends one entity attack after a second. Confirm no ground blocks
+  are clicked when there is no eligible target.
 - Toggle Nofall and test short and long drops on a disposable world/server; compare
   damage with the toggle off. Check death/dimension/disconnect reset.
 - With only the client mod installed, check G, camera-relative movement, Jump/
@@ -206,3 +195,14 @@ Use a disposable world and a test Fabric server:
   while the server-flight menu button displays the unsupported message.
 
 Automated movement, permission, and turn tests do not replace these interactive checks.
+
+### Latest local regression checks
+
+- Placed two ghost blocks at different coordinates; `/ghost clear` reported two removed.
+- Exercised additive slime/creeper filters, `@a`, and all three exclusive groups.
+- One spear press produced a roughly three-block lunge, with no repeated loop.
+- Mace selection used slot 2 and returned to slot 1.
+- The one-tick turn/return followed by delayed entity attack reduced a target cow's
+  health from 10 to 9. No block-interaction method is called by this action.
+- Player selection has unit coverage for the rear cone, range, and height; live
+  multiplayer PvP behavior has not been verified.

@@ -18,8 +18,8 @@ final class SwapActions {
     private ClientLevel level;
     boolean lungeActive() { return lunge; }
     void stop() { lunge = false; mace = false; phase = 0; delay = 0; owner = null; level = null; }
-    void toggleLunge(Minecraft client) {
-        if (lunge) { restore(client); stop(); return; }
+    void lunge(Minecraft client) {
+        if (lunge || mace) return;
         if (!ready(client)) return;
         if (!client.player.getInventory().getItem(2).is(ItemTags.SPEARS)) {
             message(client, "Put a Lunge-enchanted spear in slot 3 and a low-cooldown item in slot 1."); return;
@@ -27,9 +27,10 @@ final class SwapActions {
         stop(); owner = client.player; level = client.level; lunge = true;
     }
     void mace(Minecraft client) {
+        if (lunge || mace) return;
         if (!ready(client)) return;
-        if (!client.player.getInventory().getItem(2).is(Items.MACE)) {
-            message(client, "Put your first weapon in slot 1 and a mace in slot 3."); return;
+        if (!client.player.getInventory().getItem(1).is(Items.MACE)) {
+            message(client, "Put your first weapon in slot 1 and a mace in slot 2."); return;
         }
         stop(); owner = client.player; level = client.level; mace = true;
     }
@@ -40,16 +41,17 @@ final class SwapActions {
         if (client.screen != null) { restore(client); stop(); return; }
         if (delay-- > 0) return;
         if (phase == 0) {
-            select(client, 0); click(client); phase = 1;
-            if (lunge) delay = 4; // Recover the fast item before changing to the spear.
+            select(client, 0); phase = 1;
         } else if (phase == 1) {
+            click(client); phase = 2;
+            if (lunge) delay = 4; // Recover the fast item before changing to the spear.
+        } else if (phase == 2) {
             if ((lunge && !owner.getInventory().getItem(2).is(ItemTags.SPEARS))
-                    || (mace && !owner.getInventory().getItem(2).is(Items.MACE))) { restore(client); stop(); return; }
-            select(client, 2); click(client); phase = 2;
+                    || (mace && !owner.getInventory().getItem(1).is(Items.MACE))) { restore(client); stop(); return; }
+            select(client, mace ? 1 : 2); click(client); phase = 3;
         } else {
             restore(client);
-            if (mace) stop();
-            else { phase = 0; delay = 2; }
+            stop();
         }
     }
     private void restore(Minecraft client) { if (client.player == owner) select(client, 0); }

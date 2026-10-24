@@ -1,6 +1,6 @@
 package dev.rasm.client;
 
-/** A two-tick turn that returns along the same arc, without yaw wrapping. */
+/** A one-tick turn that returns along the same arc, without yaw wrapping. */
 public final class TurnPulse {
     private int remainingTicks;
     private float originalYaw;
@@ -8,7 +8,7 @@ public final class TurnPulse {
     public boolean start(float yaw) {
         if (active()) return false;
         originalYaw = yaw;
-        remainingTicks = 2;
+        remainingTicks = 1;
         return true;
     }
 
