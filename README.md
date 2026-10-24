@@ -14,27 +14,36 @@ requires Fabric Loader, Fabric API, and Rasm on your own client.
 | Default key | Action |
 | --- | --- |
 | `[` | Open the Rasm Client menu |
-| R | Turn 180 degrees, left-click once, then return along the same arc |
+| R | KB flick: turn 180°, attack that tick, then return |
 | G | Toggle client-side flight |
 | N | Toggle Nofall |
 | Z | One lunge swap (slots 1 / 3) |
 | X | One mace swap (slots 1 / 2) |
 | B | Add a ghost block under your feet |
 | V | Stun Slam: axe in slot 8 → mace in slot 2 |
+| H | Toggle ore X-ray |
 
 Change every action binding in **Options → Controls → Key Binds → Rasm Client**,
 or click **Rebind keys** in the Rasm menu. Server-permitted flight is unbound by
 default and can also be assigned a key. Minecraft saves these bindings.
 If upgrading from an older build, Minecraft may retain the previous menu key;
 set **Open Rasm menu** to **[** there (or reset that binding to its new default).
-The quick turn rotates out by +180 degrees and returns by -180 degrees after
-one client tick (about 50 ms). It prefers an in-reach player in the backward-facing
-cone, ignoring camera pitch for player selection so looking down does not select
-the ground. If no player qualifies, an entity directly under the backward
-crosshair can be selected instead. One second (20 ticks) after returning, it
-attacks the selected entity if still alive, visible, and within vanilla reach.
-It never clicks or breaks blocks. If no valid entity is found, nothing is attacked.
-Opening a screen, disconnecting, dying, or changing worlds cancels a pending hit.
+The KB flick rotates out by +180 degrees, synchronizes the current sprint state,
+sends the new facing, and sends an **entity attack in the same client tick**. It
+returns by -180 degrees on the following tick (about 50 ms). There is no delayed
+hit after returning. No block-click/mining action is sent.
+
+It prefers an in-reach player in the rear cone; otherwise a living entity under
+the backward crosshair can be hit. Reach and line of sight are checked at the hit.
+If no target qualifies, it only turns out and back. Pitch is preserved.
+
+For bonus knockback, sprint before triggering R with a charged attack, or use a
+Knockback-enchanted weapon. The action preserves your sprint state; it does not
+force sprint or grant enchantments. Minecraft 1.21.11 uses the attack yaw for extra
+sprint/enchantment knockback, while base knockback also depends on positions.
+Consequently, sideways displacement depends on your angle, weapon, cooldown,
+resistance, and server mechanics; a 180-degree turn alone cannot guarantee it.
+The [reference video](https://www.youtube.com/watch?v=7t0PyqYsac8) was blocked here.
 
 ## Swap actions
 
@@ -49,6 +58,16 @@ mace. It attacks with slot 1, changes to slot 2 for a second attack, and returns
 to slot 1. It does not create fall distance or guarantee extra damage.
 
 Opening a menu, disconnecting, dying, or changing worlds cancels a pending swap.
+
+## X-ray
+
+Press **H** or click **X-ray** in the menu to hide ordinary block models and show
+ore blocks and ancient debris at full brightness. Toggle it off to rebuild normal
+terrain. H can be rebound, and disconnecting resets the feature. Fluids, entities,
+and special block-entity models are not hidden. Collision and mining reach are
+unchanged. Only blocks actually sent to your client can be revealed; server
+anti-X-ray can conceal ores or send fake ore data. Third-party rendering mods
+have not been tested.
 
 ## Stun Slam
 
@@ -200,7 +219,7 @@ Use a disposable world and a test Fabric server:
 
 - Verify the compact menu, live Flight/Nofall ON/OFF states, and rebinding.
 - Place a target behind the player within vanilla reach; confirm R turns, sends
-  returns, then sends one entity attack after a second. Confirm no ground blocks
+  attacks in the flick tick, then returns. Confirm no ground blocks
   are clicked when there is no eligible target.
 - Toggle Nofall and test short and long drops on a disposable world/server; compare
   damage with the toggle off. Check death/dimension/disconnect reset.
@@ -224,7 +243,11 @@ Automated movement, permission, and turn tests do not replace these interactive 
 - Exercised additive slime/creeper filters, `@a`, and all three exclusive groups.
 - One spear press produced a roughly three-block lunge, with no repeated loop.
 - Mace selection used slot 2 and returned to slot 1.
-- The one-tick turn/return followed by delayed entity attack reduced a target cow's
-  health from 10 to 9. No block-interaction method is called by this action.
+- Same-tick flick/attack damaged a local test target and produced knockback with
+  a Knockback-enchanted weapon; yaw returned on the next tick. No block-interaction
+  method is called by this action.
+- X-ray revealed a diamond ore enclosed in stone with visible textures; toggling
+  it off restored the stone enclosure and normal terrain. Tested with the default
+  Fabric renderer, without third-party rendering mods.
 - Player selection has unit coverage for the rear cone, range, and height; live
   multiplayer PvP behavior has not been verified.

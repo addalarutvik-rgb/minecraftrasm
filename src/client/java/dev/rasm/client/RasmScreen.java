@@ -12,14 +12,14 @@ import net.minecraft.network.chat.Component;
 final class RasmScreen extends Screen {
     private final RasmClient controls;
     private int left, top, panelWidth;
-    private Button flight, nofall, ghost;
+    private Button flight, nofall, ghost, xray;
     RasmScreen(RasmClient controls) { super(Component.literal("RASM")); this.controls = controls; }
     @Override protected void init() {
         panelWidth = Math.min(350, width - 20);
         left = (width - panelWidth) / 2;
-        top = Math.max(2, (height - 232) / 2);
+        top = Math.max(2, (height - 242) / 2);
         int x = left + 12, y = top + 46, half = (panelWidth - 30) / 2;
-        button("180 turn + attack", x, y, half, () -> { closeForAction(); controls.quickTurn(Minecraft.getInstance()); });
+        button("KB flick + hit", x, y, half, () -> { closeForAction(); controls.quickTurn(Minecraft.getInstance()); });
         button("Lunge swap 1 / 3", x + half + 6, y, half, () -> {
             closeForAction(); controls.swaps.lunge(Minecraft.getInstance());
         }).setTooltip(Tooltip.create(Component.literal("Slot 1: low-cooldown item. Slot 3: Lunge spear. One sequence per press.")));
@@ -35,20 +35,22 @@ final class RasmScreen extends Screen {
         }).setTooltip(Tooltip.create(Component.literal("Axe in slot 8, mace in slot 2. Hits your target with each, then restores your starting slot. One press, one sequence.")));
         button("Server flight", x + half + 6, y + 88, half,
             () -> controls.requestServerFlight(Minecraft.getInstance()));
-        button("Rebind keys", x, y + 116, half,
+        xray = button("X-ray", x, y + 116, half, () -> Xray.toggle(Minecraft.getInstance()));
+        button("Rebind keys", x + half + 6, y + 116, half,
             () -> Minecraft.getInstance().setScreen(new KeyBindsScreen(this, Minecraft.getInstance().options)));
-        button("Done", x + half + 6, y + 116, half, this::onClose);
+        button("Done", x, y + 144, panelWidth - 24, this::onClose);
     }
     private void closeForAction() { Minecraft.getInstance().setScreen(null); }
     private Button button(String label, int x, int y, int w, Runnable action) {
         return addRenderableWidget(Button.builder(Component.literal(label), b -> action.run()).bounds(x,y,w,22).build());
     }
     @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        graphics.fill(left, top, left + panelWidth, top + 222, 0xF019202C);
+        graphics.fill(left, top, left + panelWidth, top + 238, 0xF019202C);
         graphics.fill(left, top, left + panelWidth, top + 3, 0xFF55D9CF);
         graphics.drawString(font, title, left + 12, top + 13, 0xFFF1F5FA);
         graphics.drawString(font, "Movement / combat / visuals", left + 12, top + 29, 0xFF94A3B8);
-        graphics.drawCenteredString(font, "/glow creeper   /glow off", width / 2, top + 196, 0xFF94A3B8);
+        graphics.drawCenteredString(font, "/glow creeper   /glow off", width / 2, top + 220, 0xFF94A3B8);
+        xray.setMessage(label("X-ray", Xray.active()));
         flight.setMessage(label("Flight",controls.clientFlightActive()));
         nofall.setMessage(label("Nofall",NoFall.active()));
         ghost.setMessage(Component.literal("Place ghost (" + controls.ghost.count() + ")"));

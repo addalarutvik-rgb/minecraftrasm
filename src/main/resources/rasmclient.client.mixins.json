@@ -5,7 +5,12 @@
   "client": [
     "MinecraftAttackInvoker",
     "NoFallPacketMixin",
-    "EntityGlowMixin"
+    "EntityGlowMixin",
+    "XrayStateMixin",
+    "XrayFaceMixin",
+    "XrayLightMixin",
+    "XrayAmbientMixin",
+    "XrayCacheMixin"
   ],
   "injectors": {
     "defaultRequire": 1

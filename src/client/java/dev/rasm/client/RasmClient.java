@@ -2,6 +2,8 @@ package dev.rasm.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -24,11 +26,9 @@ public final class RasmClient implements ClientModInitializer {
     private final LocalFlight flight = new LocalFlight();
     private LocalPlayer turningPlayer;
     private ClientLevel turnLevel;
-    private Entity pendingTarget;
-    private int attackDelay = -1;
     final SwapActions swaps = new SwapActions();
     final GhostBlock ghost = new GhostBlock();
-    private KeyMapping noFallKey, lungeKey, maceKey, ghostKey, serverFlightKey, stunKey;
+    private KeyMapping noFallKey, lungeKey, maceKey, ghostKey, serverFlightKey, stunKey, xrayKey;
     private KeyMapping menuKey;
     private KeyMapping flipKey;
     private KeyMapping flightKey;
@@ -43,6 +43,7 @@ public final class RasmClient implements ClientModInitializer {
         lungeKey = key("lunge", GLFW.GLFW_KEY_Z, category);
         maceKey = key("mace", GLFW.GLFW_KEY_X, category);
         stunKey = key("stun_slam", GLFW.GLFW_KEY_V, category);
+        xrayKey = key("xray", GLFW.GLFW_KEY_H, category);
         ghostKey = key("ghost", GLFW.GLFW_KEY_B, category);
         serverFlightKey = key("server_flight", GLFW.GLFW_KEY_UNKNOWN, category);
         EntityGlow.register();
@@ -52,7 +53,7 @@ public final class RasmClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             flight.stop();
             swaps.stop(); ghost.clear(); EntityGlow.reset();
-            NoFall.reset();
+            NoFall.reset(); Xray.reset();
         });
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
     }
@@ -67,7 +68,6 @@ public final class RasmClient implements ClientModInitializer {
         swaps.tick(client);
         if (turningPlayer != client.player || turnLevel != client.level) {
             turn.cancel();
-            pendingTarget = null; attackDelay = -1;
             turnLevel = client.level;
             turningPlayer = client.player;
         }
@@ -75,22 +75,9 @@ public final class RasmClient implements ClientModInitializer {
             drainKeys();
             return;
         }
-        if (!client.player.isAlive() || client.screen != null) {
-            pendingTarget = null; attackDelay = -1;
-        }
-        if (attackDelay > 0 && --attackDelay == 0) {
-            if (pendingTarget != null && pendingTarget.isAlive() && client.gameMode != null
-                    && pendingTarget.level() == client.level && client.player.hasLineOfSight(pendingTarget)
-                    && client.player.distanceToSqr(pendingTarget) <= Math.pow(client.player.entityInteractionRange(), 2)) {
-                client.gameMode.attack(client.player, pendingTarget);
-                client.player.swing(InteractionHand.MAIN_HAND);
-            }
-            pendingTarget = null; attackDelay = -1;
-        }
         if (turn.active() && turn.tick()) {
             client.player.setYRot(turn.originalYaw());
             sendFacing(client);
-            if (pendingTarget != null) attackDelay = 20;
         }
         if (client.screen != null) {
             drainKeys();
@@ -102,6 +89,7 @@ public final class RasmClient implements ClientModInitializer {
         while (noFallKey.consumeClick()) NoFall.toggle(client);
         while (lungeKey.consumeClick()) swaps.lunge(client);
         while (maceKey.consumeClick()) swaps.mace(client);
+        while (xrayKey.consumeClick()) Xray.toggle(client);
         while (stunKey.consumeClick()) swaps.stunSlam(client);
         while (ghostKey.consumeClick()) ghost.place(client);
         while (serverFlightKey.consumeClick()) requestServerFlight(client);
@@ -111,23 +99,23 @@ public final class RasmClient implements ClientModInitializer {
         while (menuKey.consumeClick()) { }
         while (flipKey.consumeClick()) { }
         while (flightKey.consumeClick()) { }
-        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey})
+        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey,xrayKey})
             while (key.consumeClick()) { }
     }
 
     void quickTurn(Minecraft client) {
-        if (client.player == null) return;
+        if (client.player == null || client.gameMode == null || !client.player.isAlive()) return;
         if (client.player.isPassenger() || client.player.isSleeping()) {
             client.player.displayClientMessage(Component.literal("Rasm: turn while standing freely."), true);
             return;
         }
-        if (attackDelay > 0 || turn.active()) return;
+        if (turn.active()) return;
         if (turn.start(client.player.getYRot())) {
             turningPlayer = client.player; turnLevel = client.level;
             client.player.setYRot(turn.turnedYaw());
-            sendFacing(client);
             client.gameRenderer.pick(1.0F);
-            pendingTarget = client.hitResult instanceof EntityHitResult hit ? hit.getEntity() : null;
+            Entity target = client.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity
+                ? hit.getEntity() : null;
             // Prefer an in-reach player behind us, even if the original pitch pointed at the ground.
             double range = client.player.entityInteractionRange();
             Player best = null;
@@ -140,7 +128,17 @@ public final class RasmClient implements ClientModInitializer {
                     best = other; distance = squared;
                 }
             }
-            if (best != null) pendingTarget = best;
+            if (best != null) target = best;
+            // Synchronize sprint and the flick yaw before the attack packet, all in this tick.
+            client.player.connection.send(new ServerboundPlayerCommandPacket(client.player,
+                client.player.isSprinting() ? ServerboundPlayerCommandPacket.Action.START_SPRINTING
+                    : ServerboundPlayerCommandPacket.Action.STOP_SPRINTING));
+            sendFacing(client);
+            if (target != null && target.isAlive() && client.player.hasLineOfSight(target)
+                    && client.player.distanceToSqr(target) <= range * range) {
+                client.gameMode.attack(client.player, target);
+                client.player.swing(InteractionHand.MAIN_HAND);
+            }
         }
     }
 
