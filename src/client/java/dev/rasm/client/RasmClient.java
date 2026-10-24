@@ -1,6 +1,8 @@
 package dev.rasm.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.rasm.client.mixin.MinecraftAttackInvoker;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -27,7 +29,11 @@ public final class RasmClient implements ClientModInitializer {
         flipKey = key("flip", GLFW.GLFW_KEY_R, category);
         flightKey = key("flight", GLFW.GLFW_KEY_G, category);
         ClientTickEvents.START_CLIENT_TICK.register(flight::tick);
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> flight.stop());
+        ClientTickEvents.START_CLIENT_TICK.register(NoFall::tick);
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            flight.stop();
+            NoFall.reset();
+        });
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
     }
 
@@ -73,6 +79,12 @@ public final class RasmClient implements ClientModInitializer {
         if (turn.start(client.player.getYRot())) {
             turningPlayer = client.player;
             client.player.setYRot(turn.turnedYaw());
+            // Send the new facing before the ordinary left-click interaction.
+            client.player.connection.send(new ServerboundMovePlayerPacket.Rot(
+                client.player.getYRot(), client.player.getXRot(),
+                client.player.onGround(), client.player.horizontalCollision));
+            client.gameRenderer.pick(1.0F);
+            ((MinecraftAttackInvoker) client).rasm$startAttack();
         }
     }
 

@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "dev.rasm.client.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["MinecraftAttackInvoker", "NoFallPacketMixin"],
+  "injectors": { "defaultRequire": 1 }
+}

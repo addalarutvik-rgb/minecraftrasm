@@ -14,13 +14,15 @@ requires Fabric Loader, Fabric API, and Rasm on your own client.
 | Default key | Action |
 | --- | --- |
 | `[` | Open the Rasm Client menu |
-| R | Turn 180 degrees, hold briefly, then turn back along the same arc |
+| R | Turn 180 degrees, left-click once, then return along the same arc |
 | G | Toggle client-side flight |
 
 Change bindings in **Options → Controls → Key Binds → Rasm Client**.
 If upgrading from an older build, Minecraft may retain the previous menu key;
 set **Open Rasm menu** to **[** there (or reset that binding to its new default).
-The quick turn lasts two client ticks (about 100 ms at normal speed), affects
+The quick turn sends the backward facing to the server, refreshes the crosshair
+target, and performs one ordinary left click (attack/block click/air swing). It
+uses vanilla reach and attack cooldown rules. The quick turn lasts two client ticks (about 100 ms at normal speed), affects
 horizontal facing, and leaves pitch unchanged. Mouse yaw during the pulse is
 replaced by the original heading on return. It does not trigger while sleeping
 or riding. GUI screens consume hotkeys without triggering actions.
@@ -42,6 +44,19 @@ server. Disabling flight restores local gravity; server fall damage still applie
 Client flight resets on disconnect, respawn, dimension changes, death, entering
 a vehicle, or sleeping. It does not change your game mode or vanilla flight
 permissions. The quick-turn hotkey is independent of flight.
+
+## Nofall
+
+Open the **[** menu and click **Nofall** to toggle it. When enabled, falling
+movement packets report an on-ground state once the local fall distance exceeds
+2.5 blocks. This attempts to reset server-side fall tracking without teleporting
+or changing health. Jumping, hovering, riding, swimming, and vanilla flight are
+excluded. The toggle resets after death, respawn, dimension changes, and disconnect.
+
+There is no fall-height cap in this mode. However, damage is decided by the server;
+a server can validate or ignore the reported ground state. Nofall cannot guarantee
+zero damage from every height or on every server. It does not block other damage
+such as lava, suffocation, or the void.
 
 ## Optional server-permitted flight
 
@@ -99,17 +114,27 @@ Tests: `./gradlew test`. The wrapper verifies Gradle's SHA-256 checksum.
 ## Validation
 
 `./gradlew build` succeeded and produced the remapped client/server JAR. All
-12 JUnit tests passed (five movement tests, four permission tests, and three
-turn-state tests).
+15 JUnit tests passed (five movement tests, four permission tests, three
+turn-state tests, and three NoFall selection tests).
 The dedicated-server launch loaded Rasm in the server environment and stopped
-at Minecraft's EULA gate (`run/eula.txt` remains `eula=false`). A connected-player
-flight test has not been performed.
+at Minecraft's EULA gate (`run/eula.txt` remains `eula=false`).
+
+The client was also launched under a virtual display into a disposable survival
+world. The redesigned menu and toggles were inspected in-game. A cow behind the
+player lost one health point when R performed the turn/attack, and the player's
+rotation returned to the starting heading with pitch preserved. With Nofall ON,
+a 160-block fall left the player at 20 health; with it OFF, a 15-block fall caused
+damage. These are integrated-server checks; public-server behavior is unverified.
 
 ## In-game validation checklist
 
 Use a disposable world and a test Fabric server:
 
-- Verify the menu, rebinding, and short turn/return.
+- Verify the compact menu, live Flight/Nofall ON/OFF states, and rebinding.
+- Place a target behind the player within vanilla reach; confirm R turns, sends
+  exactly one left click at that target, and returns. Also check air and block clicks.
+- Toggle Nofall and test short and long drops on a disposable world/server; compare
+  damage with the toggle off. Check death/dimension/disconnect reset.
 - With only the client mod installed, check G, camera-relative movement, Jump/
   Sneak, Sprint, idle hovering, GUI input, and toggle-off.
 - Check automatic client-flight reset on respawn and dimension changes.
