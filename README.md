@@ -16,8 +16,14 @@ requires Fabric Loader, Fabric API, and Rasm on your own client.
 | `[` | Open the Rasm Client menu |
 | R | Turn 180 degrees, left-click once, then return along the same arc |
 | G | Toggle client-side flight |
+| N | Toggle Nofall |
+| Z | Toggle repeated lunge swaps (slots 1 / 3) |
+| X | Perform one mace-swap sequence (slots 1 / 3) |
+| B | Place/remove a ghost block under your feet |
 
-Change bindings in **Options → Controls → Key Binds → Rasm Client**.
+Change every action binding in **Options → Controls → Key Binds → Rasm Client**,
+or click **Rebind keys** in the Rasm menu. Server-permitted flight is unbound by
+default and can also be assigned a key. Minecraft saves these bindings.
 If upgrading from an older build, Minecraft may retain the previous menu key;
 set **Open Rasm menu** to **[** there (or reset that binding to its new default).
 The quick turn sends the backward facing to the server, refreshes the crosshair
@@ -26,6 +32,58 @@ uses vanilla reach and attack cooldown rules. The quick turn lasts two client ti
 horizontal facing, and leaves pitch unchanged. Mouse yaw during the pulse is
 replaced by the original heading on return. It does not trigger while sleeping
 or riding. GUI screens consume hotkeys without triggering actions.
+
+## Swap actions
+
+**Lunge swapping (Z):** put a low-cooldown item or an empty hand in slot 1, and a
+Lunge-enchanted spear in slot 3. The macro left-clicks with slot 1, allows four
+additional ticks for the fast item to recover, switches to slot 3 and left-clicks,
+then returns to slot 1 and repeats. This uses the left-click variant of the
+[sequence supplied by the user](https://www.youtube.com/watch?v=8sQgOJTzkbo&t=5s).
+It does not automatically throw pearls or wind charges. Press Z again to stop;
+opening a menu or chat also stops the loop. Sufficient hunger and the Lunge
+enchantment are still required. It does not manufacture enchantments or momentum.
+
+**Mace swapping (X):** put your initial weapon in slot 1 and a mace in slot 3.
+The action clicks with slot 1, switches to slot 3 and clicks on the following
+tick, then returns to slot 1. Aim at a target within normal reach. This sequence
+alone does not create fall distance or guarantee a smash/extra damage; cooldown,
+invulnerability frames, and server mechanics still apply. The button performs
+one sequence per press. It is separate from continuous lunge swapping.
+
+Both actions validate the item in slot 3 and stop on disconnect or player changes.
+The adjusted lunge timing was tested locally with an empty slot 1 and Lunge III
+in slot 3: it moved the player roughly nine blocks in two seconds without movement
+keys. The mace action returned to slot 1 and damaged a target, but an extra-damage
+or smash advantage has not been verified.
+
+No code from other clients is bundled. For terminology research, the
+[Wurst AttributeSwap description](https://github.com/Wurst-Imperium/Wurst7/blob/master/src/main/java/net/wurstclient/hacks/AttributeSwapHack.java)
+was consulted; it also describes a different swap-on-attack style of mace swapping.
+
+## Entity glow
+
+`/glow creeper` adds a local outline to loaded creepers. Any registered entity type
+is accepted, including namespaced IDs such as `/glow minecraft:zombie`.
+A new command replaces the previous type filter. `/glow off` clears it; disconnect
+also clears it. Existing vanilla glowing effects remain unchanged. This is a
+client command and does not add a status effect or alter mobs on the server.
+Unloaded entities cannot be revealed. Local testing confirmed that creepers
+received an outline while a nearby cow did not; invalid entity names were rejected.
+
+## Ghost block
+
+Press B or use **Ghost** in the menu to create one full glass block in an air cell
+directly under your feet. Jump or move above air first; real blocks are never
+replaced. Press again to remove it. The block exists only in the client world,
+including local collision; the server still sees air and may correct your position.
+A local test displayed the glass cube while a server-side block check still
+reported air. It stays at the placement location rather than following your feet. Changing
+worlds, respawning, or disconnecting clears the local block.
+
+The linked [Ghostblock Modrinth project](https://modrinth.com/mod/ghostblock) could
+not be fetched from this environment. This feature implements the requested
+full block underfoot; compatibility/equivalence with that project is unverified.
 
 ## Client-side flight
 

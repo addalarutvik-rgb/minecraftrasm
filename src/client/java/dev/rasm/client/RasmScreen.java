@@ -4,65 +4,55 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.network.chat.Component;
 
 final class RasmScreen extends Screen {
     private final RasmClient controls;
-    private int panelLeft;
-    private int panelTop;
-    private int panelWidth;
-    private Button flightButton;
-    private Button noFallButton;
-
-    RasmScreen(RasmClient controls) {
-        super(Component.literal("RASM"));
-        this.controls = controls;
+    private int left, top, panelWidth;
+    private Button flight, nofall, ghost;
+    RasmScreen(RasmClient controls) { super(Component.literal("RASM")); this.controls = controls; }
+    @Override protected void init() {
+        panelWidth = Math.min(350, width - 20);
+        left = (width - panelWidth) / 2;
+        top = Math.max(2, (height - 232) / 2);
+        int x = left + 12, y = top + 46, half = (panelWidth - 30) / 2;
+        button("180 turn + attack", x, y, half, () -> { closeForAction(); controls.quickTurn(Minecraft.getInstance()); });
+        button("Lunge swap 1 / 3", x + half + 6, y, half, () -> {
+            closeForAction(); controls.swaps.toggleLunge(Minecraft.getInstance());
+        }).setTooltip(Tooltip.create(Component.literal("Slot 1: low-cooldown item. Slot 3: Lunge spear. Repeats until toggled off or a menu opens.")));
+        button("Mace swap 1 / 3", x, y + 28, half, () -> {
+            closeForAction(); controls.swaps.mace(Minecraft.getInstance());
+        }).setTooltip(Tooltip.create(Component.literal("Attacks with slot 1, switches to a mace in slot 3, attacks, then returns to slot 1.")));
+        ghost = button("Ghost block", x + half + 6, y + 28, half, () -> controls.ghost.toggle(Minecraft.getInstance()));
+        ghost.setTooltip(Tooltip.create(Component.literal("Places one client-only full glass block under your feet, in air. Click again to remove.")));
+        flight = button("Flight", x, y + 56, half, () -> controls.toggleFlight(Minecraft.getInstance()));
+        nofall = button("Nofall", x + half + 6, y + 56, half, () -> NoFall.toggle(Minecraft.getInstance()));
+        button("Server flight (optional)", x, y + 88, panelWidth - 24,
+            () -> controls.requestServerFlight(Minecraft.getInstance()));
+        button("Rebind keys", x, y + 116, half,
+            () -> Minecraft.getInstance().setScreen(new KeyBindsScreen(this, Minecraft.getInstance().options)));
+        button("Done", x + half + 6, y + 116, half, this::onClose);
     }
-
-    @Override
-    protected void init() {
-        panelWidth = Math.min(300, width - 24);
-        panelLeft = (width - panelWidth) / 2;
-        panelTop = Math.max(6, (height - 238) / 2);
-        int x = panelLeft + 16;
-        int w = panelWidth - 32;
-        int y = panelTop + 55;
-        addRenderableWidget(Button.builder(Component.literal("180 turn + attack"), button -> {
-            Minecraft client = Minecraft.getInstance();
-            client.setScreen(null);
-            controls.quickTurn(client);
-        }).bounds(x, y, w, 24).build());
-        flightButton = addRenderableWidget(Button.builder(toggleLabel("Flight", controls.clientFlightActive()),
-            button -> controls.toggleFlight(Minecraft.getInstance())).bounds(x, y + 30, w, 24).build());
-        noFallButton = addRenderableWidget(Button.builder(toggleLabel("Nofall", NoFall.active()),
-            button -> NoFall.toggle(Minecraft.getInstance())).bounds(x, y + 60, w, 24).build());
-        addRenderableWidget(Button.builder(Component.literal("Server flight (optional)"), button ->
-            controls.requestServerFlight(Minecraft.getInstance())).bounds(x, y + 96, w, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("Done"), button -> onClose())
-            .bounds(x, y + 142, w, 22).build());
+    private void closeForAction() { Minecraft.getInstance().setScreen(null); }
+    private Button button(String label, int x, int y, int w, Runnable action) {
+        return addRenderableWidget(Button.builder(Component.literal(label), b -> action.run()).bounds(x,y,w,22).build());
     }
-
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        int right = panelLeft + panelWidth;
-        int bottom = panelTop + 232;
-        graphics.fill(panelLeft, panelTop, right, bottom, 0xF019202C);
-        graphics.fill(panelLeft, panelTop, right, panelTop + 3, 0xFF55D9CF);
-        graphics.drawString(font, title, panelLeft + 16, panelTop + 15, 0xFFF1F5FA);
-        graphics.drawString(font, "Movement & combat", panelLeft + 16, panelTop + 31, 0xFF94A3B8);
-        graphics.fill(panelLeft + 16, panelTop + 46, right - 16, panelTop + 47, 0xFF364152);
-        graphics.drawCenteredString(font, "Change keys in Options > Controls", width / 2, panelTop + 180, 0xFF94A3B8);
-        flightButton.setMessage(toggleLabel("Flight", controls.clientFlightActive()));
-        noFallButton.setMessage(toggleLabel("Nofall", NoFall.active()));
-        super.render(graphics, mouseX, mouseY, delta);
+    @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        graphics.fill(left, top, left + panelWidth, top + 222, 0xF019202C);
+        graphics.fill(left, top, left + panelWidth, top + 3, 0xFF55D9CF);
+        graphics.drawString(font, title, left + 12, top + 13, 0xFFF1F5FA);
+        graphics.drawString(font, "Movement / combat / visuals", left + 12, top + 29, 0xFF94A3B8);
+        graphics.drawCenteredString(font, "/glow creeper   /glow off", width / 2, top + 196, 0xFF94A3B8);
+        flight.setMessage(label("Flight",controls.clientFlightActive()));
+        nofall.setMessage(label("Nofall",NoFall.active()));
+        ghost.setMessage(label("Ghost",controls.ghost.active()));
+        super.render(graphics,mouseX,mouseY,delta);
     }
-
-    private Component toggleLabel(String name, boolean active) {
-        return Component.literal(name + "   " + (active ? "ON" : "OFF"))
-            .withStyle(active ? ChatFormatting.AQUA : ChatFormatting.GRAY);
+    private Component label(String text, boolean active) {
+        return Component.literal(text + ": " + (active ? "ON" : "OFF")).withStyle(active ? ChatFormatting.AQUA : ChatFormatting.GRAY);
     }
-
-    @Override
-    public boolean isPauseScreen() { return false; }
+    @Override public boolean isPauseScreen() { return false; }
 }

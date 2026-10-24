@@ -18,6 +18,9 @@ public final class RasmClient implements ClientModInitializer {
     private final TurnPulse turn = new TurnPulse();
     private final LocalFlight flight = new LocalFlight();
     private LocalPlayer turningPlayer;
+    final SwapActions swaps = new SwapActions();
+    final GhostBlock ghost = new GhostBlock();
+    private KeyMapping noFallKey, lungeKey, maceKey, ghostKey, serverFlightKey;
     private KeyMapping menuKey;
     private KeyMapping flipKey;
     private KeyMapping flightKey;
@@ -28,10 +31,17 @@ public final class RasmClient implements ClientModInitializer {
         menuKey = key("menu", GLFW.GLFW_KEY_LEFT_BRACKET, category);
         flipKey = key("flip", GLFW.GLFW_KEY_R, category);
         flightKey = key("flight", GLFW.GLFW_KEY_G, category);
+        noFallKey = key("nofall", GLFW.GLFW_KEY_N, category);
+        lungeKey = key("lunge", GLFW.GLFW_KEY_Z, category);
+        maceKey = key("mace", GLFW.GLFW_KEY_X, category);
+        ghostKey = key("ghost", GLFW.GLFW_KEY_B, category);
+        serverFlightKey = key("server_flight", GLFW.GLFW_KEY_UNKNOWN, category);
+        EntityGlow.register();
         ClientTickEvents.START_CLIENT_TICK.register(flight::tick);
         ClientTickEvents.START_CLIENT_TICK.register(NoFall::tick);
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             flight.stop();
+            swaps.stop(); ghost.clear(); EntityGlow.reset();
             NoFall.reset();
         });
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
@@ -43,6 +53,8 @@ public final class RasmClient implements ClientModInitializer {
     }
 
     private void tick(Minecraft client) {
+        ghost.tick(client);
+        swaps.tick(client);
         if (turningPlayer != client.player) {
             turn.cancel();
             turningPlayer = client.player;
@@ -62,12 +74,19 @@ public final class RasmClient implements ClientModInitializer {
         while (menuKey.consumeClick()) client.setScreen(new RasmScreen(this));
         while (flipKey.consumeClick()) quickTurn(client);
         while (flightKey.consumeClick()) toggleFlight(client);
+        while (noFallKey.consumeClick()) NoFall.toggle(client);
+        while (lungeKey.consumeClick()) swaps.toggleLunge(client);
+        while (maceKey.consumeClick()) swaps.mace(client);
+        while (ghostKey.consumeClick()) ghost.toggle(client);
+        while (serverFlightKey.consumeClick()) requestServerFlight(client);
     }
 
     private void drainKeys() {
         while (menuKey.consumeClick()) { }
         while (flipKey.consumeClick()) { }
         while (flightKey.consumeClick()) { }
+        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey})
+            while (key.consumeClick()) { }
     }
 
     void quickTurn(Minecraft client) {

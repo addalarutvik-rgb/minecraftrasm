@@ -2,6 +2,12 @@
   "required": true,
   "package": "dev.rasm.client.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["MinecraftAttackInvoker", "NoFallPacketMixin"],
-  "injectors": { "defaultRequire": 1 }
+  "client": [
+    "MinecraftAttackInvoker",
+    "NoFallPacketMixin",
+    "EntityGlowMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }
