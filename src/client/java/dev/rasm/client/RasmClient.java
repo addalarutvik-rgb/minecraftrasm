@@ -28,6 +28,7 @@ public final class RasmClient implements ClientModInitializer {
     final SwapActions swaps = new SwapActions();
     final GhostBlock ghost = new GhostBlock();
     private KeyMapping noFallKey, lungeKey, maceKey, ghostKey, serverFlightKey, stunKey, xrayKey, shieldStunKey;
+    private KeyMapping panicKey;
     private KeyMapping menuKey;
     private KeyMapping flipKey;
     private KeyMapping flightKey;
@@ -35,6 +36,7 @@ public final class RasmClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         var category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("rasmclient", "controls"));
+        panicKey = key("panic", GLFW.GLFW_KEY_END, category);
         menuKey = key("menu", GLFW.GLFW_KEY_LEFT_BRACKET, category);
         flipKey = key("flip", GLFW.GLFW_KEY_R, category);
         flightKey = key("flight", GLFW.GLFW_KEY_G, category);
@@ -48,6 +50,16 @@ public final class RasmClient implements ClientModInitializer {
         serverFlightKey = key("server_flight", GLFW.GLFW_KEY_UNKNOWN, category);
         EntityGlow.register();
         ghost.register();
+        net.fabricmc.fabric.api.client.screen.v1.ScreenEvents.BEFORE_INIT.register((client, screen, width, height) -> {
+            if (screen instanceof net.minecraft.client.gui.screens.options.controls.KeyBindsScreen) return;
+            net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents.allowKeyPress(screen).register((shown, event) -> {
+                if (client.player != null && panicKey.matches(event)) { panic(client); return false; }
+                return true;
+            });
+        });
+        ClientTickEvents.START_CLIENT_TICK.register(client -> {
+            if (panicKey.consumeClick()) panic(client);
+        });
         ClientTickEvents.START_CLIENT_TICK.register(flight::tick);
         ClientTickEvents.START_CLIENT_TICK.register(NoFall::tick);
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
@@ -63,7 +75,24 @@ public final class RasmClient implements ClientModInitializer {
             "key.rasmclient." + name, InputConstants.Type.KEYSYM, code, category));
     }
 
+    void panic(Minecraft client) {
+        swaps.cancel(client);
+        if (turn.active() && client.player != null && client.player == turningPlayer && client.level == turnLevel) {
+            client.player.setYRot(turn.originalYaw());
+            sendFacing(client);
+        }
+        turn.cancel();
+        flight.panic(client);
+        NoFall.reset();
+        EntityGlow.reset();
+        ghost.clear();
+        Xray.disable(client);
+        drainKeys();
+        if (client.screen instanceof RasmScreen) client.setScreen(null);
+    }
+
     private void tick(Minecraft client) {
+        if (panicKey.consumeClick()) { panic(client); return; }
         ghost.tick(client);
         swaps.tick(client);
         if (turningPlayer != client.player || turnLevel != client.level) {
@@ -97,6 +126,7 @@ public final class RasmClient implements ClientModInitializer {
     }
 
     private void drainKeys() {
+        while (panicKey.consumeClick()) { }
         while (menuKey.consumeClick()) { }
         while (flipKey.consumeClick()) { }
         while (flightKey.consumeClick()) { }
@@ -156,6 +186,7 @@ public final class RasmClient implements ClientModInitializer {
 
     String bindingLabel(String name) {
         KeyMapping binding = switch (name) {
+            case "panic" -> panicKey;
             case "flip" -> flipKey;
             case "stun_slam" -> stunKey;
             case "shield_stun" -> shieldStunKey;

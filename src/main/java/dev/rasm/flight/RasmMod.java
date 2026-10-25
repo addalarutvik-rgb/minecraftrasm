@@ -29,6 +29,9 @@ public final class RasmMod implements ModInitializer {
     @Override
     public void onInitialize() {
         PayloadTypeRegistry.playC2S().register(FlightTogglePayload.TYPE, FlightTogglePayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(FlightDisablePayload.TYPE, FlightDisablePayload.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(FlightDisablePayload.TYPE,
+            (payload, context) -> restore(context.player()));
         // Fabric invokes play receivers on the server thread. The client cannot choose a target.
         ServerPlayNetworking.registerGlobalReceiver(FlightTogglePayload.TYPE,
             (payload, context) -> toggle(context.server(), context.player()));

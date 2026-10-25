@@ -71,7 +71,7 @@ final class RasmScreen extends Screen {
         }
         addRenderableWidget(new FlatButton(left + 8, top + panelHeight - 70, sidebar - 12, 26, "Keybinds",
             () -> minecraft.setScreen(new KeyBindsScreen(this, minecraft.options)), () -> false));
-        addRenderableWidget(new FlatButton(left + 8, top + panelHeight - 38, sidebar - 12, 26, "Close", this::onClose, () -> false));
+        addRenderableWidget(new FlatButton(left + 8, top + panelHeight - 38, sidebar - 12, 26, "PANIC", () -> controls.panic(minecraft), () -> false));
         previous = addRenderableWidget(new FlatButton(contentX + contentWidth - 60, top + panelHeight - 36, 26, 22, "<",
             () -> { page--; refreshCards(); }, () -> false));
         next = addRenderableWidget(new FlatButton(contentX + contentWidth - 28, top + panelHeight - 36, 26, 22, ">",
@@ -154,7 +154,7 @@ final class RasmScreen extends Screen {
             int x = getX(), y = getY();
             g.fill(x, y, x + getWidth(), y + getHeight(), current ? 0xFF213F43 : isHoveredOrFocused() && active ? 0xFF243449 : 0xFF162130);
             if (current) g.fill(x, y + 5, x + 2, y + getHeight() - 5, ACCENT);
-            g.drawCenteredString(font, getMessage(), x + getWidth() / 2, y + (getHeight() - 8) / 2, !active ? 0xFF48576B : current ? ACCENT : TEXT);
+            g.drawCenteredString(font, getMessage(), x + getWidth() / 2, y + (getHeight() - 8) / 2, !active ? 0xFF48576B : getMessage().getString().equals("PANIC") ? 0xFFFF818B : current ? ACCENT : TEXT);
         }
     }
     @Override public boolean isPauseScreen() { return false; }

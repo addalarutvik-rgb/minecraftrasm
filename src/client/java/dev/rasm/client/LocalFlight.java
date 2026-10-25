@@ -2,6 +2,7 @@ package dev.rasm.client;
 
 import dev.rasm.flight.FlightMotion;
 import dev.rasm.flight.FlightTogglePayload;
+import dev.rasm.flight.FlightDisablePayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -73,6 +74,12 @@ final class LocalFlight {
         }
         stop();
         ClientPlayNetworking.send(FlightTogglePayload.INSTANCE);
+    }
+
+    void panic(Minecraft client) {
+        stop();
+        if (client.player != null && ClientPlayNetworking.canSend(FlightDisablePayload.TYPE))
+            ClientPlayNetworking.send(FlightDisablePayload.INSTANCE);
     }
 
     private void message(Minecraft client, String text) {

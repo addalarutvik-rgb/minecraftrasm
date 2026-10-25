@@ -24,6 +24,10 @@ final class SwapActions {
     boolean lungeActive() { return lunge; }
     boolean active() { return lunge || mace || stun || shield; }
     void stop() { lunge = false; mace = false; stun = false; shield = false; stunTarget = null; phase = 0; owner = null; level = null; }
+    void cancel(Minecraft client) {
+        if (active() && client.player == owner && client.level == level) restore(client);
+        stop();
+    }
     void lunge(Minecraft client) {
         if (active()) return;
         if (!ready(client)) return;

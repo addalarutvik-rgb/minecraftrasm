@@ -39,11 +39,35 @@ all actions reachable. Glow group toggles, custom glow command entry, clear glow
 and clear ghost blocks are available under Visuals. Combat cards close the menu
 before performing their action; toggles leave it open.
 
+## Panic
+
+Press **End** (rebindable) or the red **PANIC** button at the bottom of the dashboard.
+It silently disables client flight, NoFall, X-ray, and custom glow; clears ghost
+blocks; cancels combat sequences; restores an active swap's return slot and a
+pending flick's original yaw; and discards queued feature hotkeys. The dashboard
+closes. Features remain off until you enable them again. The key also works in
+chat/inventory screens, except the keybind editor so you can rebind it normally.
+This disables Rasm features, not Minecraft's vanilla glow or creative abilities.
+Server-permitted Rasm flight receives an explicit disable-only request when the
+server supports it; multiplayer servers need this updated Rasm version for that
+request. Existing server-granted permissions are preserved.
+
+## Lunar on Windows
+
+This is a Fabric 1.21.11 mod, not a Lunar injector. Lunar compatibility has not been
+verified here (its support site was inaccessible from the build environment).
+If your Lunar profile supports custom Fabric mods for 1.21.11, use its supported
+mods-folder control and select that instance in the installer. Do not assume the
+standard `%APPDATA%/.minecraft` folder is Lunar's active instance. If the profile
+does not support custom Fabric mods, use a separate Fabric 1.21.11 installation.
+The installer cannot add Fabric support to a running Lunar session.
+
 ## Controls
 
 | Default key | Action |
 | --- | --- |
 | `[` | Open the Rasm Client menu |
+| End | Panic: disable all Rasm features |
 | R | KB flick + immediate Stun Slam |
 | G | Toggle client-side flight |
 | N | Toggle Nofall |
@@ -335,3 +359,8 @@ Dashboard validation: opened the redesigned screen in Minecraft 1.21.11, checked
 Combat pagination, cross-category glow search, live ON state, and Keybinds
 navigation. Opened the standalone Swing installer on Linux and verified its
 packaged installation flow using the disposable-folder checks above.
+
+Panic validation: enabled Flight, NoFall, X-ray, and player glow, pressed End
+from the dashboard, and confirmed all four states became OFF and normal terrain
+returned. Repeated shutdown through the red button closed the dashboard without
+a new mod chat message. Dedicated-server shutdown and Lunar remain unverified.

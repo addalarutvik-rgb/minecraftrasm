@@ -21,5 +21,10 @@ public final class Xray {
         enabled = !enabled;
         if (client.level != null) client.levelRenderer.allChanged();
     }
+    public static void disable(Minecraft client) {
+        if (!enabled) return;
+        enabled = false;
+        if (client.level != null) client.levelRenderer.allChanged();
+    }
     public static void reset() { enabled = false; }
 }

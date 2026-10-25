@@ -10,5 +10,6 @@
   "key.rasmclient.server_flight": "Request server-permitted flight",
   "key.rasmclient.stun_slam": "Stun Slam: slot 1 to axe 8 to mace 2",
   "key.rasmclient.xray": "Toggle ore X-ray",
-  "key.rasmclient.shield_stun": "Shield Stun: slot 1 to axe 8 to slot 1"
+  "key.rasmclient.shield_stun": "Shield Stun: slot 1 to axe 8 to slot 1",
+  "key.rasmclient.panic": "Panic: disable all Rasm features"
 }
