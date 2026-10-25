@@ -34,3 +34,17 @@ java {
 }
 tasks.withType(JavaCompile).configureEach { options.release = 21 }
 test { useJUnitPlatform() }
+
+// Standalone Java desktop installer with the exact remapped client embedded.
+sourceSets { installer }
+tasks.register('installerJar', Jar) {
+    dependsOn tasks.named('installerClasses'), tasks.named('remapJar')
+    archiveFileName = 'rasm-installer.jar'
+    from sourceSets.installer.output
+    from(tasks.named('remapJar').flatMap { it.archiveFile }) {
+        into 'payload'
+        rename { 'rasm-client.jar' }
+    }
+    manifest { attributes 'Main-Class': 'dev.rasm.installer.RasmInstaller' }
+}
+tasks.named('build') { dependsOn tasks.named('installerJar') }

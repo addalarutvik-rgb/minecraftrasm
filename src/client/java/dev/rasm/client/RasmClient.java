@@ -154,6 +154,23 @@ public final class RasmClient implements ClientModInitializer {
             client.player.getYRot(), client.player.getXRot(), client.player.onGround(), client.player.horizontalCollision));
     }
 
+    String bindingLabel(String name) {
+        KeyMapping binding = switch (name) {
+            case "flip" -> flipKey;
+            case "stun_slam" -> stunKey;
+            case "shield_stun" -> shieldStunKey;
+            case "lunge" -> lungeKey;
+            case "mace" -> maceKey;
+            case "flight" -> flightKey;
+            case "nofall" -> noFallKey;
+            case "server_flight" -> serverFlightKey;
+            case "xray" -> xrayKey;
+            case "ghost" -> ghostKey;
+            default -> menuKey;
+        };
+        return binding.isUnbound() ? "Unbound" : binding.getTranslatedKeyMessage().getString();
+    }
+
     void toggleFlight(Minecraft client) { flight.toggle(client); }
     boolean clientFlightActive() { return flight.active(); }
     void requestServerFlight(Minecraft client) { flight.requestServerFlight(client); }

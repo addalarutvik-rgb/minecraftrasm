@@ -21,6 +21,11 @@ public final class EntityGlow {
     private static final Set<String> groups = new HashSet<>();
     private static final Set<UUID> players = new HashSet<>();
     private EntityGlow() {}
+    static boolean groupActive(String group) { return groups.contains(group); }
+    static void toggleGroup(String group) {
+        if (!Set.of("players", "hostile", "passive").contains(group)) return;
+        if (!groups.remove(group)) groups.add(group);
+    }
     public static void reset() { types.clear(); groups.clear(); players.clear(); }
     public static boolean matches(Entity entity) {
         boolean hostile = entity.getType().getCategory() == MobCategory.MONSTER;

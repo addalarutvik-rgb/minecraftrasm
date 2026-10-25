@@ -9,6 +9,36 @@ A Fabric mod for **Minecraft Java 1.21.11** using Java 21, with client-side
 flight and an optional server-permitted flight mode. Client-side flight only
 requires Fabric Loader, Fabric API, and Rasm on your own client.
 
+## Desktop installer
+
+[Download the standalone installer](https://github.com/addalarutvik-rgb/minecraftrasm/raw/refs/heads/main/downloads/rasm-installer.jar).
+Double-click it with Java 21 installed, or run `java -jar rasm-installer.jar`.
+Close Minecraft, choose your instance folder (the folder containing `mods`), and
+click **Install / update Rasm**. Start your Fabric 1.21.11 installation and press
+`[` to open the dashboard. Fabric Loader and Fabric API must already be installed.
+For launchers with separate instances, use **Browse** to select the right instance.
+
+The installer includes the client; no separate mod download or manual file copy
+is needed. It backs up previous Rasm JARs to `rasm-backups` outside `mods`, preserves
+other mods, and refuses to overwrite an unrelated file using the same filename.
+Do not put the installer JAR itself in `mods`.
+
+This is an installer, **not a live injector**. The client still loads from the
+instance's mods folder on startup. An already-running Minecraft session must be
+restarted because the features rely on Fabric startup hooks and mixins.
+Double-clicking requires an executable JAR association; if your OS opens an archive
+viewer instead, use the Java command above. Desktop behavior was checked on Linux;
+Windows and macOS have not been tested here.
+
+## Dashboard
+
+The `[` menu uses Combat, Movement, and Visuals categories with searchable cards.
+Search spans all categories. Cards show the current keybind and live ON/OFF state;
+**Keybinds** opens Minecraft's binding editor. Small windows use pagination to keep
+all actions reachable. Glow group toggles, custom glow command entry, clear glow,
+and clear ghost blocks are available under Visuals. Combat cards close the menu
+before performing their action; toggles leave it open.
+
 ## Controls
 
 | Default key | Action |
@@ -293,3 +323,15 @@ silently skip invalid equipment and do not print chat or action-bar messages.
 - X-ray face-occlusion update: checked adjacent diamond/iron ores enclosed in stone
   from above and at an angle; visible top and side faces formed complete cubes.
   Turning X-ray off restored the enclosure. Tested with default Fabric rendering.
+
+### Installer validation
+
+`./gradlew build` produces both the mod and `build/libs/rasm-installer.jar`.
+Run `JAVA_HOME=/path/to/jdk-21 python3 scripts/test-installer.py` to check fresh
+installation, renamed-version updates, backups, unrelated-mod preservation,
+invalid folders, and filename conflicts in disposable folders.
+
+Dashboard validation: opened the redesigned screen in Minecraft 1.21.11, checked
+Combat pagination, cross-category glow search, live ON state, and Keybinds
+navigation. Opened the standalone Swing installer on Linux and verified its
+packaged installation flow using the disposable-folder checks above.
