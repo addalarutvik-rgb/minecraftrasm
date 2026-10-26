@@ -21,6 +21,10 @@ import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public final class RasmClient implements ClientModInitializer {
+    private boolean autoStun;
+    private final FallTrigger autoFall = new FallTrigger();
+    private LocalPlayer autoOwner;
+    private ClientLevel autoLevel;
     private final TurnPulse turn = new TurnPulse();
     private final LocalFlight flight = new LocalFlight();
     private LocalPlayer turningPlayer;
@@ -48,6 +52,7 @@ public final class RasmClient implements ClientModInitializer {
         xrayKey = key("xray", GLFW.GLFW_KEY_H, category);
         ghostKey = key("ghost", GLFW.GLFW_KEY_B, category);
         serverFlightKey = key("server_flight", GLFW.GLFW_KEY_UNKNOWN, category);
+        BlockEsp.register();
         EntityGlow.register();
         ghost.register();
         net.fabricmc.fabric.api.client.screen.v1.ScreenEvents.BEFORE_INIT.register((client, screen, width, height) -> {
@@ -65,7 +70,7 @@ public final class RasmClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             flight.stop();
             swaps.stop(); ghost.clear(); EntityGlow.reset();
-            NoFall.reset(); Xray.reset();
+            NoFall.reset(); Xray.reset(); BlockEsp.reset(); autoStun = false; autoFall.reset();
         });
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
     }
@@ -76,6 +81,8 @@ public final class RasmClient implements ClientModInitializer {
     }
 
     void panic(Minecraft client) {
+        FeatureSwitches.disableAll();
+        autoStun = false; autoFall.reset(); BlockEsp.reset();
         swaps.cancel(client);
         if (turn.active() && client.player != null && client.player == turningPlayer && client.level == turnLevel) {
             client.player.setYRot(turn.originalYaw());
@@ -88,11 +95,12 @@ public final class RasmClient implements ClientModInitializer {
         ghost.clear();
         Xray.disable(client);
         drainKeys();
-        if (client.screen instanceof RasmScreen) client.setScreen(null);
+        if (client.screen instanceof RasmScreen || client.screen instanceof BlockEspScreen) client.setScreen(null);
     }
 
     private void tick(Minecraft client) {
         if (panicKey.consumeClick()) { panic(client); return; }
+        BlockEsp.tick(client);
         ghost.tick(client);
         swaps.tick(client);
         if (turningPlayer != client.player || turnLevel != client.level) {
@@ -113,16 +121,18 @@ public final class RasmClient implements ClientModInitializer {
             return;
         }
         while (menuKey.consumeClick()) client.setScreen(new RasmScreen(this));
-        while (flipKey.consumeClick()) quickTurn(client);
-        while (flightKey.consumeClick()) toggleFlight(client);
-        while (noFallKey.consumeClick()) NoFall.toggle(client);
-        while (lungeKey.consumeClick()) swaps.lunge(client);
-        while (maceKey.consumeClick()) swaps.mace(client);
-        while (xrayKey.consumeClick()) Xray.toggle(client);
-        while (stunKey.consumeClick()) swaps.stunSlam(client);
-        while (shieldStunKey.consumeClick()) swaps.shieldStun(client);
-        while (ghostKey.consumeClick()) ghost.place(client);
-        while (serverFlightKey.consumeClick()) requestServerFlight(client);
+        if (client.screen != null) { drainKeys(); return; }
+        tickAutoStun(client);
+        while (flipKey.consumeClick()) if (FeatureSwitches.enabled("flip")) quickTurn(client);
+        while (flightKey.consumeClick()) if (FeatureSwitches.enabled("flight")) toggleFlight(client);
+        while (noFallKey.consumeClick()) if (FeatureSwitches.enabled("nofall")) NoFall.toggle(client);
+        while (lungeKey.consumeClick()) if (FeatureSwitches.enabled("lunge")) swaps.lunge(client);
+        while (maceKey.consumeClick()) if (FeatureSwitches.enabled("mace")) swaps.mace(client);
+        while (xrayKey.consumeClick()) if (FeatureSwitches.enabled("xray")) Xray.toggle(client);
+        while (stunKey.consumeClick()) if (FeatureSwitches.enabled("stun_slam")) swaps.stunSlam(client);
+        while (shieldStunKey.consumeClick()) if (FeatureSwitches.enabled("shield_stun")) swaps.shieldStun(client);
+        while (ghostKey.consumeClick()) if (FeatureSwitches.enabled("ghost")) ghost.place(client);
+        while (serverFlightKey.consumeClick()) if (FeatureSwitches.enabled("server_flight")) requestServerFlight(client);
     }
 
     private void drainKeys() {
@@ -175,7 +185,7 @@ public final class RasmClient implements ClientModInitializer {
                 client.gameMode.attack(client.player, target);
             }
             client.player.swing(InteractionHand.MAIN_HAND);
-            swaps.stunSlam(client, target instanceof LivingEntity living ? living : null);
+            if (FeatureSwitches.enabled("stun_slam")) swaps.stunSlam(client, target instanceof LivingEntity living ? living : null);
         }
     }
 
@@ -184,7 +194,56 @@ public final class RasmClient implements ClientModInitializer {
             client.player.getYRot(), client.player.getXRot(), client.player.onGround(), client.player.horizontalCollision));
     }
 
+    boolean featureEnabled(String id) { return FeatureSwitches.enabled(id); }
+    void toggleFeature(String id) {
+        boolean enabled = !FeatureSwitches.enabled(id);
+        FeatureSwitches.set(id, enabled);
+        if (enabled) return;
+        Minecraft client = Minecraft.getInstance();
+        switch (id) {
+            case "flight" -> flight.stop();
+            case "server_flight" -> flight.panic(client);
+            case "nofall" -> NoFall.reset();
+            case "xray" -> Xray.disable(client);
+            case "ghost" -> ghost.clear();
+            case "block_esp" -> BlockEsp.disable();
+            case "auto_stun", "stun_slam" -> { autoStun = false; swaps.cancel(client); }
+            case "lunge", "mace", "shield_stun" -> swaps.cancel(client);
+            case "flip" -> {
+                swaps.cancel(client);
+                if (turn.active() && client.player == turningPlayer && client.player != null && client.level == turnLevel) {
+                    client.player.setYRot(turn.originalYaw()); sendFacing(client);
+                }
+                turn.cancel();
+            }
+            default -> { }
+        }
+        drainKeys();
+    }
+    boolean autoStunActive() { return autoStun; }
+    void toggleAutoStun() { autoStun = !autoStun; }
+    private void tickAutoStun(Minecraft client) {
+        var player = client.player;
+        if (player != autoOwner || client.level != autoLevel) {
+            autoFall.reset(); autoOwner = player; autoLevel = client.level;
+        }
+        if (player.onGround()) autoFall.reset();
+        if (!autoStun || !FeatureSwitches.enabled("auto_stun") || !FeatureSwitches.enabled("stun_slam")
+                || swaps.active() || turn.active() || !player.isAlive() || player.isSpectator()
+                || player.isPassenger() || player.isInWater() || player.isFallFlying()
+                || player.getAbilities().flying || flight.active() || player.getDeltaMovement().y >= -0.08
+                || player.fallDistance < 0.5 || client.gameMode == null) return;
+        if (!player.getInventory().getItem(7).is(net.minecraft.tags.ItemTags.AXES)
+                || !player.getInventory().getItem(1).is(net.minecraft.world.item.Items.MACE)) return;
+        client.gameRenderer.pick(1.0F);
+        if (client.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof Player target
+                && target != player && target.isAlive() && !target.isSpectator() && player.hasLineOfSight(target)
+                && player.distanceToSqr(target) <= Math.pow(player.entityInteractionRange(), 2)
+                && autoFall.update(player.onGround(), true)) swaps.stunSlam(client, target);
+    }
+
     String bindingLabel(String name) {
+        if (name.equals("auto_stun") || name.equals("block_esp")) return "Menu";
         KeyMapping binding = switch (name) {
             case "panic" -> panicKey;
             case "flip" -> flipKey;

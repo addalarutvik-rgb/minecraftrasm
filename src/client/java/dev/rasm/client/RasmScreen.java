@@ -24,7 +24,9 @@ final class RasmScreen extends Screen {
     private EditBox search;
     private Button previous, next;
     private record Feature(String category, String name, String detail, String binding,
-                           Runnable action, BooleanSupplier enabled, boolean closes) {}
+                           Runnable action, BooleanSupplier enabled, boolean closes) {
+        String id() { return binding.isEmpty() ? name : binding; }
+    }
 
     RasmScreen(RasmClient controls) {
         super(Component.literal("Rasm dashboard"));
@@ -45,6 +47,8 @@ final class RasmScreen extends Screen {
         features.add(new Feature("Visuals", "Glow Passive", "Highlight passive / neutral mobs", "", () -> EntityGlow.toggleGroup("passive"), () -> EntityGlow.groupActive("passive"), false));
         features.add(new Feature("Visuals", "Custom Glow", "Choose a player or entity name", "", () -> minecraft.setScreen(new net.minecraft.client.gui.screens.ChatScreen("/glow ", false)), null, false));
         features.add(new Feature("Visuals", "Clear Glow", "Remove all custom glow filters", "", EntityGlow::reset, null, false));
+        features.add(new Feature("Combat", "Auto Stun Slam", "Once per fall; aim at a player", "auto_stun", controls::toggleAutoStun, controls::autoStunActive, false));
+        features.add(new Feature("Visuals", "Block ESP", "Choose blocks to highlight", "block_esp", () -> minecraft.setScreen(new BlockEspScreen(this)), BlockEsp::active, false));
     }
 
     @Override protected void init() {
@@ -95,6 +99,7 @@ final class RasmScreen extends Screen {
             Feature feature = shown.get(i);
             Button card = new FeatureCard(contentX + (cell % columns) * (cardWidth + 8), top + 64 + (cell / columns) * 62, cardWidth, feature);
             cards.add(addRenderableWidget(card));
+            cards.add(addRenderableWidget(new FeatureSwitch(card.getX() + cardWidth - 54, card.getY() + 37, feature)));
         }
         previous.active = page > 0;
         next.active = page + 1 < pages;
@@ -120,7 +125,8 @@ final class RasmScreen extends Screen {
     private final class FeatureCard extends Button {
         private final Feature feature;
         FeatureCard(int x, int y, int w, Feature feature) {
-            super(x, y, w, 54, Component.literal(feature.name), b -> {
+            super(x, y, w, 36, Component.literal(feature.name), b -> {
+                if (!controls.featureEnabled(feature.id())) return;
                 if (feature.closes) Minecraft.getInstance().setScreen(null);
                 feature.action.run();
             }, DEFAULT_NARRATION);
@@ -128,18 +134,34 @@ final class RasmScreen extends Screen {
             setTooltip(Tooltip.create(Component.literal(feature.detail + (feature.binding.isEmpty() ? "" : " | Key: " + controls.bindingLabel(feature.binding)))));
         }
         @Override protected void renderContents(GuiGraphics g, int mx, int my, float dt) {
-            boolean on = feature.enabled != null && feature.enabled.getAsBoolean();
+            active = controls.featureEnabled(feature.id());
+            boolean on = active && feature.enabled != null && feature.enabled.getAsBoolean();
             boolean hover = isHoveredOrFocused();
             int x = getX(), y = getY(), w = getWidth();
             g.fill(x, y, x + w, y + 54, hover ? 0xFF293A4E : 0xFF1A2839);
             g.fill(x, y, x + 2, y + 54, on || hover ? ACCENT : 0xFF34465C);
-            String status = feature.enabled == null ? "RUN" : on ? "ON" : "OFF";
+            String status = !active ? "OFF" : feature.enabled == null ? "RUN" : on ? "ON" : "IDLE";
             int statusWidth = font.width(status);
             g.drawString(font, status, x + w - statusWidth - 9, y + 10, on ? ACCENT : MUTED, false);
             g.drawString(font, font.plainSubstrByWidth(feature.name, w - statusWidth - 30), x + 10, y + 10, TEXT, false);
             g.drawString(font, font.plainSubstrByWidth(feature.detail, w - 20), x + 10, y + 26, MUTED, false);
             String key = feature.binding.isEmpty() ? "UTILITY" : controls.bindingLabel(feature.binding);
-            g.drawString(font, font.plainSubstrByWidth(key, w - 20), x + 10, y + 40, 0xFF65B9D8, false);
+            g.drawString(font, font.plainSubstrByWidth(key, w - 70), x + 10, y + 40, 0xFF65B9D8, false);
+        }
+    }
+
+    private final class FeatureSwitch extends Button {
+        private final Feature feature;
+        FeatureSwitch(int x, int y, Feature feature) {
+            super(x, y, 48, 15, Component.literal("Enable/disable " + feature.name),
+                b -> controls.toggleFeature(feature.id()), DEFAULT_NARRATION);
+            this.feature = feature;
+            setTooltip(Tooltip.create(Component.literal("OFF blocks this feature and its hotkey. ON permits use.")));
+        }
+        @Override protected void renderContents(GuiGraphics g, int mx, int my, float dt) {
+            boolean enabled = controls.featureEnabled(feature.id());
+            g.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), enabled ? 0xFF23574D : 0xFF47303B);
+            g.drawCenteredString(font, enabled ? "ON" : "OFF", getX() + 24, getY() + 3, enabled ? ACCENT : 0xFFFF9AA3);
         }
     }
 

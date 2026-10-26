@@ -39,13 +39,42 @@ all actions reachable. Glow group toggles, custom glow command entry, clear glow
 and clear ghost blocks are available under Visuals. Combat cards close the menu
 before performing their action; toggles leave it open.
 
+## Master switches, Auto Stun Slam, and Block ESP
+
+Every feature card now has a separate **ON/OFF master switch** in its lower-right
+corner. OFF stops that feature and blocks its hotkey and card action. ON permits
+use; it does not automatically run an attack or turn on flight. The main card
+still runs the action or toggles its active state. Menu access, keybind editing,
+and Panic always remain available. Switches last for the current client session.
+Panic sets **all master switches OFF**, so hotkeys cannot restart a feature until
+you explicitly enable its switch again.
+
+**Auto Stun Slam** is a separate Combat card, initially inactive. Enable it and
+leave the Stun Slam master switch ON. It activates once per fall when you are
+descending, have fallen at least half a block, and aim directly at a live player
+within normal melee reach and line of sight. It requires an axe in slot 8 and a
+mace in slot 2. It does not trigger on mobs, while in a GUI, while flying/gliding,
+or during another swap/flick. Landing rearms it. The same manual Stun Slam timing
+is used; each attack rechecks the target. Disabling Stun Slam also stops automation.
+Auto mode resets on disconnect and Panic. Multiplayer shield/smash results still
+depend on server combat rules and have not been verified with this automation.
+
+**Block ESP** opens a searchable, paginated list of every registered block under
+Visuals. Search by localized name or full registry ID. Click entries to select
+multiple types; click again to remove them. Selected loaded blocks get teal
+wireframe boxes through terrain. The picker includes ESP ON/OFF and Clear selections.
+The incremental scan covers a **24-block radius**, updates over roughly 1.5 seconds,
+and caps the display at **128 markers**. It cannot reveal data the server has not
+sent. Selections reset on disconnect/Panic. Outlines use the standard camera FOV;
+shader/third-party camera compatibility is unverified.
+
 ## Panic
 
 Press **End** (rebindable) or the red **PANIC** button at the bottom of the dashboard.
 It silently disables client flight, NoFall, X-ray, and custom glow; clears ghost
 blocks; cancels combat sequences; restores an active swap's return slot and a
 pending flick's original yaw; and discards queued feature hotkeys. The dashboard
-closes. Features remain off until you enable them again. The key also works in
+closes. All feature master switches remain off until you enable them again. The key also works in
 chat/inventory screens, except the keybind editor so you can rebind it normally.
 This disables Rasm features, not Minecraft's vanilla glow or creative abilities.
 Server-permitted Rasm flight receives an explicit disable-only request when the
@@ -285,8 +314,9 @@ Tests: `./gradlew test`. The wrapper verifies Gradle's SHA-256 checksum.
 ## Validation
 
 `./gradlew build` succeeded and produced the remapped client/server JAR. All
-18 JUnit tests passed (five movement tests, four permission tests, three
-turn-state tests, three NoFall selection tests, and three backward target-selection tests).
+21 JUnit tests passed (five movement tests, four permission tests, three
+turn-state tests, three NoFall selection tests, three backward target-selection tests,
+two once-per-fall trigger tests, and one master-switch/Panic test).
 The dedicated-server launch loaded Rasm in the server environment and stopped
 at Minecraft's EULA gate (`run/eula.txt` remains `eula=false`).
 
@@ -364,3 +394,9 @@ Panic validation: enabled Flight, NoFall, X-ray, and player glow, pressed End
 from the dashboard, and confirmed all four states became OFF and normal terrain
 returned. Repeated shutdown through the red button closed the dashboard without
 a new mod chat message. Dedicated-server shutdown and Lunar remain unverified.
+
+Latest feature checks: searched the full block picker for diamond_ore, selected
+Diamond Ore, and observed a teal cube through its stone enclosure. Turning the
+X-ray master switch OFF blocked H without removing the separate ESP outline.
+Panic removed the outline. Auto Stun Slam has unit-tested once-per-fall rearming;
+automatic attacks against another player have not been tested in multiplayer.

@@ -10,7 +10,8 @@
     "XrayFaceMixin",
     "XrayLightMixin",
     "XrayAmbientMixin",
-    "XrayCacheMixin"
+    "XrayCacheMixin",
+    "GameRendererFovInvoker"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -29,11 +29,11 @@ public final class EntityGlow {
     public static void reset() { types.clear(); groups.clear(); players.clear(); }
     public static boolean matches(Entity entity) {
         boolean hostile = entity.getType().getCategory() == MobCategory.MONSTER;
-        return entity instanceof Player && players.contains(entity.getUUID())
-            || types.contains(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()))
-            || groups.contains("players") && entity instanceof Player
-            || groups.contains("hostile") && entity instanceof Mob && hostile
-            || groups.contains("passive") && entity instanceof Mob && !hostile;
+        return entity instanceof Player && FeatureSwitches.enabled("Custom Glow") && players.contains(entity.getUUID())
+            || FeatureSwitches.enabled("Custom Glow") && types.contains(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()))
+            || FeatureSwitches.enabled("Glow Players") && groups.contains("players") && entity instanceof Player
+            || FeatureSwitches.enabled("Glow Hostile") && groups.contains("hostile") && entity instanceof Mob && hostile
+            || FeatureSwitches.enabled("Glow Passive") && groups.contains("passive") && entity instanceof Mob && !hostile;
     }
     public static void register() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> dispatcher.register(
