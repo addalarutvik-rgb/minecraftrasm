@@ -32,18 +32,34 @@ Windows and macOS have not been tested here.
 
 ## Dashboard
 
-The `[` menu uses Combat, Movement, and Visuals categories with searchable cards.
-Search spans all categories. Cards show the current keybind and live ON/OFF state;
-**Keybinds** opens Minecraft's binding editor. Small windows use pagination to keep
-all actions reachable. Glow group toggles, custom glow command entry, clear glow,
-and clear ghost blocks are available under Visuals. Combat cards close the menu
-before performing their action; toggles leave it open.
+![Rasm control center](docs/dashboard.png)
+
+![Block library](docs/block-library.png)
+
+The `[` control center has All, Combat, Movement, Visuals, and Pinned sections.
+Search spans every category. Feature rows show their action/state, current key,
+and a separate **ON/OFF master switch** on the right. Click the main row to run
+or toggle a feature; the master switch controls whether it can run at all.
+Right-click a row to pin/unpin it, then use **Pinned** for a compact favorites list.
+Disabled features can still be pinned, but left-clicking them does not run them.
+
+Use **Mint / Violet / Amber** at the bottom to cycle accent colors. Navigation,
+search, switches, and the block picker share the same theme. Favorites and theme
+choices last for the current session. The selected category is remembered when
+reopening the dashboard. **Keybinds** opens Minecraft's binding editor; **Panic**
+stays available in the sidebar. Close with X or Escape. Smaller GUI sizes use
+pagination; wider layouts can show two columns of feature rows.
+
+The Block ESP library now shows item icons and a clear selection border. **All**
+and **Selected** filters share the name/ID search. ESP ON/OFF pauses highlights
+without clearing selections; **Clear all** removes them. Blocks without item
+forms still appear in the registry browser with a placeholder icon.
 
 ## Master switches, Auto Stun Slam, and Block ESP
 
-Every feature card now has a separate **ON/OFF master switch** in its lower-right
-corner. OFF stops that feature and blocks its hotkey and card action. ON permits
-use; it does not automatically run an attack or turn on flight. The main card
+Every feature card now has a separate **ON/OFF master switch** on the right
+side. OFF stops that feature and blocks its hotkey and card action. ON permits
+use; it does not automatically run an attack or turn on flight. The main row
 still runs the action or toggles its active state. Menu access, keybind editing,
 and Panic always remain available. Switches last for the current client session.
 Panic sets **all master switches OFF**, so hotkeys cannot restart a feature until
@@ -400,3 +416,10 @@ Diamond Ore, and observed a teal cube through its stone enclosure. Turning the
 X-ray master switch OFF blocked H without removing the separate ESP outline.
 Panic removed the outline. Auto Stun Slam has unit-tested once-per-fall rearming;
 automatic attacks against another player have not been tested in multiplayer.
+
+Interface redesign validation: launched the remapped production JAR with Fabric
+1.21.11; checked search, right-click pinning, Pinned filtering, accent switching,
+master OFF/LOCK display, block icons, multiple selections, and the Selected filter.
+Checked the layouts at 640x480, 854x480, and 1280x720 window sizes. The build and
+21 unit tests passed, as did the standalone installer integration checks.
+Lunar loading compatibility remains unverified.

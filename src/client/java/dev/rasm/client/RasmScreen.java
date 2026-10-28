@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 
 /** Compact dashboard; categories and pagination keep every control reachable at high GUI scale. */
 final class RasmScreen extends Screen {
-    private static final int TEXT = 0xFFE8EEF8, MUTED = 0xFF8C9CB4, ACCENT = 0xFF63E3C2;
     private final RasmClient controls;
     private final List<Feature> features = new ArrayList<>();
     private final List<Button> cards = new ArrayList<>();
@@ -51,132 +50,143 @@ final class RasmScreen extends Screen {
         features.add(new Feature("Visuals", "Block ESP", "Choose blocks to highlight", "block_esp", () -> minecraft.setScreen(new BlockEspScreen(this)), BlockEsp::active, false));
     }
 
+    private static String rememberedCategory = "All";
+    private static final java.util.Set<String> pinned = new java.util.HashSet<>();
+    private int sidebar, resultCount;
+
     @Override protected void init() {
-        panelWidth = Math.min(570, width - 12);
-        panelHeight = Math.min(326, height - 12);
-        left = (width - panelWidth) / 2;
-        top = (height - panelHeight) / 2;
-        int sidebar = panelWidth < 400 ? 88 : 108;
-        contentX = left + sidebar + 14;
-        contentWidth = panelWidth - sidebar - 28;
-        columns = contentWidth >= 240 ? 2 : 1;
-        rows = Math.max(1, (panelHeight - 99) / 62);
-        search = new EditBox(font, contentX, top + 17, contentWidth, 22, Component.literal("Search features"));
-        search.setMaxLength(64);
-        search.setHint(Component.literal("Search features..."));
-        search.setValue(query);
-        search.setResponder(value -> { query = value; page = 0; refreshCards(); });
-        addRenderableWidget(search);
-        String[] categories = {"Combat", "Movement", "Visuals"};
-        for (int i = 0; i < categories.length; i++) {
-            String name = categories[i];
-            addRenderableWidget(new FlatButton(left + 8, top + 60 + i * 30, sidebar - 12, 28, name,
-                () -> { category = name; page = 0; search.setValue(""); refreshCards(); }, () -> category.equals(name)));
+        category = rememberedCategory;
+        panelWidth = Math.min(710, width - 12);
+        panelHeight = Math.min(390, height - 12);
+        left = (width - panelWidth) / 2; top = (height - panelHeight) / 2;
+        sidebar = panelWidth < 390 ? 82 : 102;
+        contentX = left + sidebar + 12; contentWidth = panelWidth - sidebar - 24;
+        // Single rows at normal GUI scale keep full feature names readable.
+        columns = contentWidth >= 480 ? 2 : 1;
+        rows = Math.max(1, (panelHeight - 92) / 38);
+        int searchWidth = Math.min(248, panelWidth - 166);
+        search = new EditBox(font,left+panelWidth-searchWidth-39,top+15,searchWidth-12,16,Component.literal("Search all features"));
+        search.setBordered(false); search.setTextColor(RasmUi.TEXT);
+        search.setMaxLength(64); search.setHint(Component.literal("Search features...")); search.setValue(query);
+        search.setResponder(value -> { query=value; page=0; refreshCards(); }); addRenderableWidget(search);
+        addRenderableWidget(new RasmUi.Control(left+panelWidth-31,top+10,22,24,()->"X",this::onClose,()->false,false));
+        String[] categories={"All", "Combat", "Movement", "Visuals", "Pinned"};
+        int tabStep = Math.min(29, Math.max(20, (panelHeight-102)/5));
+        for(int i=0;i<categories.length;i++) {
+            String name=categories[i];
+            addRenderableWidget(new RasmUi.Control(left+9,top+49+i*tabStep,sidebar-12,tabStep-3,()->name,
+                ()->{ category=name; rememberedCategory=name; page=0; search.setValue(""); refreshCards(); },()->category.equals(name)&&query.isBlank(),false));
         }
-        addRenderableWidget(new FlatButton(left + 8, top + panelHeight - 70, sidebar - 12, 26, "Keybinds",
-            () -> minecraft.setScreen(new KeyBindsScreen(this, minecraft.options)), () -> false));
-        addRenderableWidget(new FlatButton(left + 8, top + panelHeight - 38, sidebar - 12, 26, "PANIC", () -> controls.panic(minecraft), () -> false));
-        previous = addRenderableWidget(new FlatButton(contentX + contentWidth - 60, top + panelHeight - 36, 26, 22, "<",
-            () -> { page--; refreshCards(); }, () -> false));
-        next = addRenderableWidget(new FlatButton(contentX + contentWidth - 28, top + panelHeight - 36, 26, 22, ">",
-            () -> { page++; refreshCards(); }, () -> false));
-        cards.clear();
-        refreshCards();
+        addRenderableWidget(new RasmUi.Control(left+9,top+panelHeight-50,sidebar-12,19,()->"Keybinds",
+            ()->minecraft.setScreen(new KeyBindsScreen(this,minecraft.options)),()->false,false));
+        addRenderableWidget(new RasmUi.Control(left+9,top+panelHeight-27,sidebar-12,19,()->"Panic",
+            ()->controls.panic(minecraft),()->false,true)).setTooltip(Tooltip.create(Component.literal("Disable everything • "+controls.bindingLabel("panic"))));
+        previous=addRenderableWidget(new RasmUi.Control(contentX+contentWidth-49,top+panelHeight-27,22,19,()->"<",()->{page--;refreshCards();},()->false,false));
+        next=addRenderableWidget(new RasmUi.Control(contentX+contentWidth-23,top+panelHeight-27,22,19,()->">",()->{page++;refreshCards();},()->false,false));
+        addRenderableWidget(new RasmUi.Control(contentX,top+panelHeight-27,60,19,RasmUi::themeName,RasmUi::nextTheme,()->false,false))
+            .setTooltip(Tooltip.create(Component.literal("Change accent color: Mint / Violet / Amber")));
+        cards.clear(); refreshCards();
     }
 
     private void refreshCards() {
-        cards.forEach(this::removeWidget);
-        cards.clear();
-        String filter = query.toLowerCase(Locale.ROOT).trim();
-        List<Feature> shown = features.stream().filter(f -> filter.isEmpty() ? f.category.equals(category)
-            : (f.name + " " + f.detail + " " + f.category).toLowerCase(Locale.ROOT).contains(filter)).toList();
-        int capacity = rows * columns;
-        pages = Math.max(1, (shown.size() + capacity - 1) / capacity);
-        page = Math.max(0, Math.min(page, pages - 1));
-        int cardWidth = (contentWidth - (columns - 1) * 8) / columns;
-        for (int i = page * capacity; i < Math.min(shown.size(), (page + 1) * capacity); i++) {
-            int cell = i - page * capacity;
-            Feature feature = shown.get(i);
-            Button card = new FeatureCard(contentX + (cell % columns) * (cardWidth + 8), top + 64 + (cell / columns) * 62, cardWidth, feature);
-            cards.add(addRenderableWidget(card));
-            cards.add(addRenderableWidget(new FeatureSwitch(card.getX() + cardWidth - 54, card.getY() + 37, feature)));
+        cards.forEach(this::removeWidget); cards.clear();
+        String filter=query.toLowerCase(Locale.ROOT).trim();
+        List<Feature> shown=features.stream().filter(f -> filter.isEmpty()
+            ? category.equals("All") || (category.equals("Pinned") ? pinned.contains(f.id()) : f.category.equals(category))
+            : (f.name+" "+f.detail+" "+f.category).toLowerCase(Locale.ROOT).contains(filter)).toList();
+        resultCount=shown.size(); int capacity=rows*columns;
+        pages=Math.max(1,(shown.size()+capacity-1)/capacity); page=Math.max(0,Math.min(page,pages-1));
+        int cardWidth=(contentWidth-(columns-1)*7)/columns;
+        for(int i=page*capacity;i<Math.min(shown.size(),(page+1)*capacity);i++) {
+            int cell=i-page*capacity; Feature feature=shown.get(i);
+            int x=contentX+(cell%columns)*(cardWidth+7), y=top+63+(cell/columns)*38;
+            cards.add(addRenderableWidget(new FeatureCard(x,y,cardWidth-45,feature)));
+            cards.add(addRenderableWidget(new FeatureSwitch(x+cardWidth-42,y,42,feature)));
         }
-        previous.active = page > 0;
-        next.active = page + 1 < pages;
+        previous.active=page>0; next.active=page+1<pages;
     }
 
-    @Override public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
-        g.fill(0, 0, width, height, 0xA5090E17);
-        g.fill(left - 3, top + 4, left + panelWidth + 3, top + panelHeight + 4, 0x70000000);
-        g.fill(left, top, left + panelWidth, top + panelHeight, 0xFF101925);
-        g.fill(left, top, contentX - 14, top + panelHeight, 0xFF0C131D);
-        g.fill(left, top, left + panelWidth, top + 2, ACCENT);
-        g.drawString(font, "R A S M", left + 13, top + 18, TEXT, false);
-        g.drawString(font, "1.21.11", left + 13, top + 33, MUTED, false);
-        g.drawString(font, query.isBlank() ? category.toUpperCase(Locale.ROOT) : "SEARCH RESULTS", contentX, top + 49, MUTED, false);
-        g.fill(contentX, top + panelHeight - 43, left + panelWidth - 14, top + panelHeight - 42, 0xFF243246);
-        String footer = category.equals("Visuals") && query.isBlank() ? "Ghosts: " + controls.ghost.count() + "  /glow <name>" : "Select a feature  /  Esc to close";
-        g.drawString(font, font.plainSubstrByWidth(footer, contentWidth - 110), contentX, top + panelHeight - 29, MUTED, false);
-        g.drawString(font, (page + 1) + "/" + pages, contentX + contentWidth - 96, top + panelHeight - 29, MUTED, false);
-        if (cards.isEmpty()) g.drawString(font, "No matching features", contentX + 10, top + 85, MUTED, false);
-        super.render(g, mouseX, mouseY, delta);
+    @Override public void render(GuiGraphics g,int mx,int my,float delta) {
+        RasmUi.frame(g,width,height,left,top,panelWidth,panelHeight);
+        g.fill(left+sidebar,top+43,left+sidebar+1,top+panelHeight-8,RasmUi.BORDER);
+        RasmUi.round(g,left+11,top+12,21,21,RasmUi.blend(RasmUi.SURFACE,RasmUi.accent(),0.2f));
+        RasmUi.icon(g,"All",left+13,top+14,RasmUi.accent());
+        g.drawString(font,"R A S M",left+40,top+12,RasmUi.TEXT,false);
+        RasmUi.small(g,"CONTROL CENTER",left+40,top+25,95,RasmUi.MUTED);
+        int searchWidth=Math.min(248,panelWidth-166);
+        RasmUi.box(g,left+panelWidth-searchWidth-45,top+9,searchWidth,25,RasmUi.SURFACE,search.isFocused()?RasmUi.accent():RasmUi.BORDER);
+        String title=query.isBlank()?category:"Search results";
+        g.drawString(font,title,contentX,top+47,RasmUi.TEXT,false);
+        String count=resultCount+(resultCount==1?" feature":" features");
+        g.drawString(font,count,contentX+contentWidth-font.width(count),top+47,RasmUi.MUTED,false);
+        if(cards.isEmpty()) {
+            g.drawString(font,category.equals("Pinned")&&query.isBlank()?"Your favorites go here":"No matching features",contentX+8,top+77,RasmUi.TEXT,false);
+            RasmUi.text(g,"Right-click a feature to pin it.",contentX+8,top+94,contentWidth-16,RasmUi.MUTED);
+        }
+        RasmUi.small(g,"MC 1.21.11",left+12,top+38,sidebar-14,RasmUi.DIM);
+        g.drawString(font,(page+1)+" / "+pages,contentX+contentWidth-90,top+panelHeight-21,RasmUi.MUTED,false);
+        super.render(g,mx,my,delta);
     }
 
     private final class FeatureCard extends Button {
         private final Feature feature;
-        FeatureCard(int x, int y, int w, Feature feature) {
-            super(x, y, w, 36, Component.literal(feature.name), b -> {
-                if (!controls.featureEnabled(feature.id())) return;
-                if (feature.closes) Minecraft.getInstance().setScreen(null);
+        private float hover;
+        private long last=System.nanoTime();
+        FeatureCard(int x,int y,int w,Feature feature) {
+            super(x,y,w,33,Component.literal(feature.name),b->{
+                if(!controls.featureEnabled(feature.id())) return;
+                if(feature.closes) Minecraft.getInstance().setScreen(null);
                 feature.action.run();
-            }, DEFAULT_NARRATION);
-            this.feature = feature;
-            setTooltip(Tooltip.create(Component.literal(feature.detail + (feature.binding.isEmpty() ? "" : " | Key: " + controls.bindingLabel(feature.binding)))));
+            },DEFAULT_NARRATION);
+            this.feature=feature;
+            setTooltipDelay(java.time.Duration.ofMillis(450));
+            setTooltip(Tooltip.create(Component.literal(feature.detail+"\nKey: "+(feature.binding.isEmpty()?"Menu":controls.bindingLabel(feature.binding))+"\nRight-click to pin / unpin. Switch OFF blocks the hotkey.")));
         }
-        @Override protected void renderContents(GuiGraphics g, int mx, int my, float dt) {
-            active = controls.featureEnabled(feature.id());
-            boolean on = active && feature.enabled != null && feature.enabled.getAsBoolean();
-            boolean hover = isHoveredOrFocused();
-            int x = getX(), y = getY(), w = getWidth();
-            g.fill(x, y, x + w, y + 54, hover ? 0xFF293A4E : 0xFF1A2839);
-            g.fill(x, y, x + 2, y + 54, on || hover ? ACCENT : 0xFF34465C);
-            String status = !active ? "OFF" : feature.enabled == null ? "RUN" : on ? "ON" : "IDLE";
-            int statusWidth = font.width(status);
-            g.drawString(font, status, x + w - statusWidth - 9, y + 10, on ? ACCENT : MUTED, false);
-            g.drawString(font, font.plainSubstrByWidth(feature.name, w - statusWidth - 30), x + 10, y + 10, TEXT, false);
-            g.drawString(font, font.plainSubstrByWidth(feature.detail, w - 20), x + 10, y + 26, MUTED, false);
-            String key = feature.binding.isEmpty() ? "UTILITY" : controls.bindingLabel(feature.binding);
-            g.drawString(font, font.plainSubstrByWidth(key, w - 70), x + 10, y + 40, 0xFF65B9D8, false);
+        @Override protected boolean isValidClickButton(net.minecraft.client.input.MouseButtonInfo button) {
+            return button.button()==0 || button.button()==1;
+        }
+        @Override public void onClick(net.minecraft.client.input.MouseButtonEvent event,boolean doubleClick) {
+            if(event.button()==1) {
+                if(!pinned.remove(feature.id())) pinned.add(feature.id());
+                if(category.equals("Pinned")) refreshCards();
+            } else super.onClick(event,doubleClick);
+        }
+        @Override protected void renderContents(GuiGraphics g,int mx,int my,float dt) {
+            boolean permitted=controls.featureEnabled(feature.id());
+            boolean running=permitted && feature.enabled!=null && feature.enabled.getAsBoolean();
+            long now=System.nanoTime(); float step=Math.min(1,(now-last)/100_000_000f);last=now;
+            hover+=((isHoveredOrFocused()?1:0)-hover)*step;
+            int x=getX(),y=getY(),w=getWidth();
+            RasmUi.box(g,x,y,w,33,RasmUi.blend(RasmUi.SURFACE,RasmUi.accent(),hover*0.07f),
+                running?RasmUi.blend(RasmUi.BORDER,RasmUi.accent(),0.6f):RasmUi.BORDER);
+            if(pinned.contains(feature.id())) g.fill(x+2,y+5,x+4,y+28,RasmUi.accent());
+            RasmUi.icon(g,feature.category,x+7,y+8,permitted?RasmUi.accent():RasmUi.DIM);
+            String status=!permitted?"LOCK":feature.enabled==null?"RUN":running?"ON":"OFF";
+            if(feature.id().equals("block_esp")||feature.name.equals("Custom Glow")) status=permitted?"OPEN":"LOCK";
+            int statusWidth=font.width(status)+10;
+            RasmUi.round(g,x+w-statusWidth-6,y+8,statusWidth,16,running?RasmUi.blend(RasmUi.SURFACE,RasmUi.accent(),0.2f):0xFF111824);
+            g.drawString(font,status,x+w-statusWidth-1,y+12,running?RasmUi.accent():RasmUi.MUTED,false);
+            RasmUi.text(g,feature.name,x+28,y+6,w-statusWidth-40,permitted?RasmUi.TEXT:RasmUi.DIM);
+            String key=feature.binding.isEmpty()?"":controls.bindingLabel(feature.binding)+"  /  ";
+            RasmUi.small(g,key+feature.detail,x+28,y+20,w-statusWidth-40,RasmUi.MUTED);
         }
     }
 
     private final class FeatureSwitch extends Button {
         private final Feature feature;
-        FeatureSwitch(int x, int y, Feature feature) {
-            super(x, y, 48, 15, Component.literal("Enable/disable " + feature.name),
-                b -> controls.toggleFeature(feature.id()), DEFAULT_NARRATION);
-            this.feature = feature;
-            setTooltip(Tooltip.create(Component.literal("OFF blocks this feature and its hotkey. ON permits use.")));
+        FeatureSwitch(int x,int y,int w,Feature feature) {
+            super(x,y,w,33,Component.literal("Enable or disable "+feature.name),b->controls.toggleFeature(feature.id()),DEFAULT_NARRATION);
+            this.feature=feature;
+            setTooltipDelay(java.time.Duration.ofMillis(450));
+            setTooltip(Tooltip.create(Component.literal("Master switch: OFF stops this feature and blocks its key. ON allows it.")));
         }
-        @Override protected void renderContents(GuiGraphics g, int mx, int my, float dt) {
-            boolean enabled = controls.featureEnabled(feature.id());
-            g.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), enabled ? 0xFF23574D : 0xFF47303B);
-            g.drawCenteredString(font, enabled ? "ON" : "OFF", getX() + 24, getY() + 3, enabled ? ACCENT : 0xFFFF9AA3);
-        }
-    }
-
-    private final class FlatButton extends Button {
-        private final BooleanSupplier selected;
-        FlatButton(int x, int y, int w, int h, String name, Runnable action, BooleanSupplier selected) {
-            super(x, y, w, h, Component.literal(name), b -> action.run(), DEFAULT_NARRATION);
-            this.selected = selected;
-        }
-        @Override protected void renderContents(GuiGraphics g, int mx, int my, float dt) {
-            boolean current = selected.getAsBoolean();
-            int x = getX(), y = getY();
-            g.fill(x, y, x + getWidth(), y + getHeight(), current ? 0xFF213F43 : isHoveredOrFocused() && active ? 0xFF243449 : 0xFF162130);
-            if (current) g.fill(x, y + 5, x + 2, y + getHeight() - 5, ACCENT);
-            g.drawCenteredString(font, getMessage(), x + getWidth() / 2, y + (getHeight() - 8) / 2, !active ? 0xFF48576B : getMessage().getString().equals("PANIC") ? 0xFFFF818B : current ? ACCENT : TEXT);
+        @Override protected void renderContents(GuiGraphics g,int mx,int my,float dt) {
+            boolean on=controls.featureEnabled(feature.id());
+            int x=getX(),y=getY();
+            RasmUi.box(g,x,y,getWidth(),33,0xFF141C2A,isHoveredOrFocused()?RasmUi.accent():RasmUi.BORDER);
+            RasmUi.round(g,x+9,y+5,24,11,on?RasmUi.blend(RasmUi.SURFACE,RasmUi.accent(),0.5f):0xFF354056);
+            RasmUi.round(g,x+(on?23:11),y+7,8,7,on?RasmUi.accent():RasmUi.MUTED);
+            RasmUi.small(g,on?"ON":"OFF",x+14,y+22,25,on?RasmUi.accent():RasmUi.MUTED);
         }
     }
     @Override public boolean isPauseScreen() { return false; }
