@@ -35,6 +35,7 @@ final class RasmScreen extends Screen {
         features.add(new Feature("Combat", "Shield Stun", "Slot 1 > axe 8 > slot 1", "shield_stun", () -> controls.swaps.shieldStun(minecraft), null, true));
         features.add(new Feature("Combat", "Lunge Swap", "Slot 1 > spear 3; one attack", "lunge", () -> controls.swaps.lunge(minecraft), null, true));
         features.add(new Feature("Combat", "Mace Swap", "Slot 1 > mace 2 > slot 1", "mace", () -> controls.swaps.mace(minecraft), null, true));
+        features.add(new Feature("Movement", "Pearl Catch", "Pearl 5 > wind charge 4", "pearl_catch", () -> controls.swaps.pearlCatch(minecraft), null, true));
         features.add(new Feature("Movement", "Flight", "Camera-relative flight", "flight", () -> controls.toggleFlight(minecraft), controls::clientFlightActive, false));
         features.add(new Feature("Movement", "NoFall", "Toggle fall packet handling", "nofall", () -> NoFall.toggle(minecraft), NoFall::active, false));
         features.add(new Feature("Movement", "Server Flight", "Requires server permission", "server_flight", () -> controls.requestServerFlight(minecraft), null, false));

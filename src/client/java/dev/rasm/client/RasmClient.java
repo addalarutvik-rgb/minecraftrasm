@@ -32,6 +32,7 @@ public final class RasmClient implements ClientModInitializer {
     final SwapActions swaps = new SwapActions();
     final GhostBlock ghost = new GhostBlock();
     private KeyMapping noFallKey, lungeKey, maceKey, ghostKey, serverFlightKey, stunKey, xrayKey, shieldStunKey;
+    private KeyMapping pearlCatchKey;
     private KeyMapping panicKey;
     private KeyMapping menuKey;
     private KeyMapping flipKey;
@@ -49,6 +50,7 @@ public final class RasmClient implements ClientModInitializer {
         maceKey = key("mace", GLFW.GLFW_KEY_X, category);
         stunKey = key("stun_slam", GLFW.GLFW_KEY_V, category);
         shieldStunKey = key("shield_stun", GLFW.GLFW_KEY_J, category);
+        pearlCatchKey = key("pearl_catch", GLFW.GLFW_KEY_P, category);
         xrayKey = key("xray", GLFW.GLFW_KEY_H, category);
         ghostKey = key("ghost", GLFW.GLFW_KEY_B, category);
         serverFlightKey = key("server_flight", GLFW.GLFW_KEY_UNKNOWN, category);
@@ -131,6 +133,7 @@ public final class RasmClient implements ClientModInitializer {
         while (xrayKey.consumeClick()) if (FeatureSwitches.enabled("xray")) Xray.toggle(client);
         while (stunKey.consumeClick()) if (FeatureSwitches.enabled("stun_slam")) swaps.stunSlam(client);
         while (shieldStunKey.consumeClick()) if (FeatureSwitches.enabled("shield_stun")) swaps.shieldStun(client);
+        while (pearlCatchKey.consumeClick()) if (FeatureSwitches.enabled("pearl_catch")) swaps.pearlCatch(client);
         while (ghostKey.consumeClick()) if (FeatureSwitches.enabled("ghost")) ghost.place(client);
         while (serverFlightKey.consumeClick()) if (FeatureSwitches.enabled("server_flight")) requestServerFlight(client);
     }
@@ -140,7 +143,7 @@ public final class RasmClient implements ClientModInitializer {
         while (menuKey.consumeClick()) { }
         while (flipKey.consumeClick()) { }
         while (flightKey.consumeClick()) { }
-        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey,xrayKey,shieldStunKey})
+        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey,xrayKey,shieldStunKey,pearlCatchKey})
             while (key.consumeClick()) { }
     }
 
@@ -208,7 +211,7 @@ public final class RasmClient implements ClientModInitializer {
             case "ghost" -> ghost.clear();
             case "block_esp" -> BlockEsp.disable();
             case "auto_stun", "stun_slam" -> { autoStun = false; swaps.cancel(client); }
-            case "lunge", "mace", "shield_stun" -> swaps.cancel(client);
+            case "lunge", "mace", "shield_stun", "pearl_catch" -> swaps.cancel(client);
             case "flip" -> {
                 swaps.cancel(client);
                 if (turn.active() && client.player == turningPlayer && client.player != null && client.level == turnLevel) {
@@ -251,6 +254,7 @@ public final class RasmClient implements ClientModInitializer {
             case "shield_stun" -> shieldStunKey;
             case "lunge" -> lungeKey;
             case "mace" -> maceKey;
+            case "pearl_catch" -> pearlCatchKey;
             case "flight" -> flightKey;
             case "nofall" -> noFallKey;
             case "server_flight" -> serverFlightKey;

@@ -16,14 +16,15 @@ final class SwapActions {
     private boolean mace;
     private boolean stun;
     private boolean shield;
+    private boolean pearl;
     private int returnSlot;
     private LivingEntity stunTarget;
     private int phase;
     private LocalPlayer owner;
     private ClientLevel level;
     boolean lungeActive() { return lunge; }
-    boolean active() { return lunge || mace || stun || shield; }
-    void stop() { lunge = false; mace = false; stun = false; shield = false; stunTarget = null; phase = 0; owner = null; level = null; }
+    boolean active() { return lunge || mace || stun || shield || pearl; }
+    void stop() { lunge = false; mace = false; stun = false; shield = false; pearl = false; stunTarget = null; phase = 0; owner = null; level = null; }
     void cancel(Minecraft client) {
         if (active() && client.player == owner && client.level == level) restore(client);
         stop();
@@ -78,11 +79,42 @@ final class SwapActions {
         tick(client);
     }
 
+    // Launch on activation, then use the charge on the next client tick (~50 ms).
+    void pearlCatch(Minecraft client) {
+        if (active() || !ready(client) || client.screen != null || client.player.isSpectator()) return;
+        var inventory = client.player.getInventory();
+        var pearlStack = inventory.getItem(4);
+        var chargeStack = inventory.getItem(3);
+        if (!pearlStack.is(Items.ENDER_PEARL) || !chargeStack.is(Items.WIND_CHARGE)
+                || client.player.getCooldowns().isOnCooldown(pearlStack)
+                || client.player.getCooldowns().isOnCooldown(chargeStack)) return;
+        stop(); owner = client.player; level = client.level; pearl = true;
+        returnSlot = inventory.getSelectedSlot();
+        select(client, 4);
+        if (!client.gameMode.useItem(owner, InteractionHand.MAIN_HAND).consumesAction()) {
+            restore(client); stop(); return;
+        }
+        owner.swing(InteractionHand.MAIN_HAND);
+    }
+
     private boolean ready(Minecraft client) { return client.player != null && client.gameMode != null && client.player.isAlive(); }
     void tick(Minecraft client) {
         if (!active()) return;
         if (!ready(client) || owner != client.player || level != client.level) { stop(); return; }
         if (client.screen != null) { restore(client); stop(); return; }
+        if (pearl) {
+            var charge = owner.getInventory().getItem(3);
+            if (!FeatureSwitches.enabled("pearl_catch") || !charge.is(Items.WIND_CHARGE)
+                    || owner.getCooldowns().isOnCooldown(charge)) {
+                restore(client); stop(); return;
+            }
+            select(client, 3);
+            if (client.gameMode.useItem(owner, InteractionHand.MAIN_HAND).consumesAction()) {
+                owner.swing(InteractionHand.MAIN_HAND);
+            } else restore(client);
+            stop(); // Leave slot 4 selected after a successful throw.
+            return;
+        }
         if ((stun || shield) && (!owner.getInventory().getItem(7).is(ItemTags.AXES)
                 || stun && !owner.getInventory().getItem(1).is(Items.MACE))) {
             restore(client); stop(); return;
@@ -108,7 +140,7 @@ final class SwapActions {
             stop();
         }
     }
-    private void restore(Minecraft client) { if (client.player == owner) select(client, stun ? returnSlot : 0); }
+    private void restore(Minecraft client) { if (client.player == owner) select(client, (stun || pearl) ? returnSlot : 0); }
     private void select(Minecraft client, int slot) {
         client.player.getInventory().setSelectedSlot(slot);
         client.player.connection.send(new ServerboundSetCarriedItemPacket(slot));

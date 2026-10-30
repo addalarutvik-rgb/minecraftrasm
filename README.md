@@ -119,6 +119,7 @@ The installer cannot add Fabric support to a running Lunar session.
 | Z | One lunge swap (slots 1 / 3) |
 | X | One mace swap (slots 1 / 2) |
 | B | Add a ghost block under your feet |
+| P | Pearl Catch: pearl 5 → wind charge 4 |
 | V | Stun Slam: slot 1 → axe 8 → mace 2 |
 | H | Toggle ore X-ray |
 | J | Shield Stun: slot 1 → axe 8 → slot 1 |
@@ -423,3 +424,15 @@ master OFF/LOCK display, block icons, multiple selections, and the Selected filt
 Checked the layouts at 640x480, 854x480, and 1280x720 window sizes. The build and
 21 unit tests passed, as did the standalone installer integration checks.
 Lunar loading compatibility remains unverified.
+
+## Pearl Catch
+
+Put ender pearls in slot **5** and wind charges in slot **4**. Press **P**
+(rebindable in Controls) or use **Movement → Pearl Catch**. It throws the pearl,
+then switches to slot 4 and uses the wind charge on the next client tick
+(about 50 ms). Each press runs once and leaves slot 4 selected. Aim before
+activation; the feature does not aim for you. Projectile contact depends on
+angle, movement, latency, and server behavior; the sequence cannot guarantee a catch.
+Missing items or item cooldowns prevent activation. The master switch blocks
+its hotkey; disabling it, opening a screen, or pressing Panic cancels the pending
+charge and restores the original slot. It produces no chat messages.
