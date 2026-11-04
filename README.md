@@ -213,24 +213,53 @@ The revised fast sequence and front-target KB displacement need live PvP testing
 
 ## Entity glow
 
-Use `/glow Rasmore` to highlight one online player by username (case-insensitive).
-Player names autocomplete from the current server's player list. Repeat with other
-names to select multiple players; existing mob filters remain active. Selections
-track player UUIDs and apply when those players are loaded, including after they
-come into render distance. `/glow only Rasmore` replaces all filters with that
-player. For names that collide with a filter or command, use `/glow player NAME`
-(or `/glow only player NAME`). Offline/unknown names report an error without
-clearing existing selections.
+Glow commands run locally and successful commands stay silent:
 
-Filters stack: `/glow slime` followed by `/glow creeper` highlights both types.
-`/glow @a` or `/glow players` adds all loaded players. `/glow hostile` adds mobs
-in Minecraft's MONSTER category; `/glow passive` adds other mobs (including neutral
-animals; this is a type category, not their current aggression state).
+| Command | Result |
+| --- | --- |
+| `/glow players red` or `/glow @a red` | Red outlines for loaded players |
+| `/glow creeper green` | Green outlines for creepers |
+| `/glow Rasmore hiphop` | Assign online player Rasmore to local group hiphop |
+| `/glow Alex hiphop` | Add Alex to the same group |
+| `/glow hiphop blue` | Turn every member of hiphop blue |
+| `/unglow hostiles` | Remove Rasm glow from hostile mobs |
+| `/unglow Rasmore` | Exclude that player, even when all players glow |
+| `/unglow creeper` | Remove Rasm glow from creepers |
+| `/unglow hiphop` | Remove that group's glow and group definition |
+| `/glow clear` or `/unglow clear` | Clear all local glow rules and groups |
 
-For an exclusive selection, use `/glow only hostile`, `/glow only passive`, or
-`/glow only players`. `/glow only creeper` also works. `/glow clear` and `/glow off`
-remove all custom filters. Vanilla glow is preserved. Filters reset on disconnect.
-These commands run locally and only affect entities loaded by the client.
+Targets support online player names (case-insensitive), entity IDs, `players` /
+`@a`, `hostile` / `hostiles`, and `passive` / `passives`. Hostile means Minecraft's
+MONSTER category; passive includes neutral mobs. Individual players are tracked
+by UUID and glow when loaded. Use `/glow player NAME [color|team]` or
+`/unglow player NAME` for player names that collide with built-in groups.
+`/glow only creeper green` clears existing rules before selecting only creepers;
+`only` also works with players and built-in groups.
+
+Colors accept Minecraft color names (`red`, `blue`, `green`, `aqua`, `gold`,
+`light_purple`, etc.) or `#RRGGBB`. No color means white. A custom group is created
+when assigning a target to an unused name; it starts white until colored. Names
+use 1–32 letters, digits, underscores or hyphens and must not collide with colors,
+commands, built-in groups, entity IDs or online player names. Each target can
+belong to one custom group at a time. These are local glow groups, not server teams.
+
+Rules are additive for different targets. When rules overlap, the **latest matching
+/glow or /unglow target command wins**. Coloring a custom group updates its members'
+colors without changing rule order. For example, `/unglow hostiles` followed by
+`/glow creeper green` restores just creepers. Master switches still gate glow.
+Vanilla/server glow is preserved; `/unglow` only removes this client's extra glow.
+All rules and groups reset on disconnect or Panic.
+
+## In-client keybind editor
+
+Open **[ → Keybinds** in the Rasm menu. Search any registered Rasm control,
+including Flight, Pearl Catch, menu access, Panic, Auto Stun Slam, and Block ESP.
+Click its binding and press a keyboard key or mouse button. **Backspace** unbinds;
+**Esc** cancels capture. **Reset** restores that control's default. Red bindings
+indicate a conflict with another Minecraft/mod control. Changes save immediately
+in Minecraft's options and survive restart. Auto Stun Slam and Block ESP start
+unbound. The dashboard shows the current bindings. Master switches still block
+feature keys, and Panic is not triggered while assigning keys in this editor.
 
 ## Ghost blocks
 
@@ -436,3 +465,11 @@ angle, movement, latency, and server behavior; the sequence cannot guarantee a c
 Missing items or item cooldowns prevent activation. The master switch blocks
 its hotkey; disabling it, opening a screen, or pressing Panic cancels the pending
 charge and restores the original slot. It produces no chat messages.
+
+Glow/keybind update validation: 26 unit tests pass, including overlapping removal,
+team recoloring/removal, and reset behavior. Installer integration checks pass.
+In a Fabric 1.21.11 development client, verified red player outlines, assigning
+an online player to `hiphop`, recoloring that group blue, and `/unglow` removing
+that player's outline. Verified the in-client Flight binding can be searched,
+changed to K, cleared with Backspace, and reset to G, with each change written
+to `options.txt`. Lunar compatibility remains unverified.

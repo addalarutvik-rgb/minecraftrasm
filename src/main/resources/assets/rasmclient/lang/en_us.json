@@ -1,5 +1,7 @@
 {
   "key.category.rasmclient.controls": "Rasm Client",
+  "key.rasmclient.auto_stun": "Toggle Auto Stun Slam",
+  "key.rasmclient.block_esp": "Open Block ESP",
   "key.rasmclient.menu": "Open Rasm menu",
   "key.rasmclient.flip": "KB flick + immediate Stun Slam",
   "key.rasmclient.flight": "Toggle client flight",

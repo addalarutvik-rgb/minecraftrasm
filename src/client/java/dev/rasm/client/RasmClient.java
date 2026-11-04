@@ -32,6 +32,9 @@ public final class RasmClient implements ClientModInitializer {
     final SwapActions swaps = new SwapActions();
     final GhostBlock ghost = new GhostBlock();
     private KeyMapping noFallKey, lungeKey, maceKey, ghostKey, serverFlightKey, stunKey, xrayKey, shieldStunKey;
+    private KeyMapping autoStunKey, blockEspKey;
+    private final java.util.List<KeyMapping> bindings = new java.util.ArrayList<>();
+    java.util.List<KeyMapping> bindings() { return java.util.List.copyOf(bindings); }
     private KeyMapping pearlCatchKey;
     private KeyMapping panicKey;
     private KeyMapping menuKey;
@@ -54,11 +57,13 @@ public final class RasmClient implements ClientModInitializer {
         xrayKey = key("xray", GLFW.GLFW_KEY_H, category);
         ghostKey = key("ghost", GLFW.GLFW_KEY_B, category);
         serverFlightKey = key("server_flight", GLFW.GLFW_KEY_UNKNOWN, category);
+        autoStunKey = key("auto_stun", GLFW.GLFW_KEY_UNKNOWN, category);
+        blockEspKey = key("block_esp", GLFW.GLFW_KEY_UNKNOWN, category);
         BlockEsp.register();
         EntityGlow.register();
         ghost.register();
         net.fabricmc.fabric.api.client.screen.v1.ScreenEvents.BEFORE_INIT.register((client, screen, width, height) -> {
-            if (screen instanceof net.minecraft.client.gui.screens.options.controls.KeyBindsScreen) return;
+            if (screen instanceof RasmKeybindScreen || screen instanceof net.minecraft.client.gui.screens.options.controls.KeyBindsScreen) return;
             net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents.allowKeyPress(screen).register((shown, event) -> {
                 if (client.player != null && panicKey.matches(event)) { panic(client); return false; }
                 return true;
@@ -78,8 +83,10 @@ public final class RasmClient implements ClientModInitializer {
     }
 
     private KeyMapping key(String name, int code, KeyMapping.Category category) {
-        return KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        KeyMapping binding = KeyBindingHelper.registerKeyBinding(new KeyMapping(
             "key.rasmclient." + name, InputConstants.Type.KEYSYM, code, category));
+        bindings.add(binding);
+        return binding;
     }
 
     void panic(Minecraft client) {
@@ -124,6 +131,9 @@ public final class RasmClient implements ClientModInitializer {
         }
         while (menuKey.consumeClick()) client.setScreen(new RasmScreen(this));
         if (client.screen != null) { drainKeys(); return; }
+        while (autoStunKey.consumeClick()) if (FeatureSwitches.enabled("auto_stun")) toggleAutoStun();
+        while (blockEspKey.consumeClick()) if (FeatureSwitches.enabled("block_esp")) client.setScreen(new BlockEspScreen(new RasmScreen(this)));
+        if (client.screen != null) { drainKeys(); return; }
         tickAutoStun(client);
         while (flipKey.consumeClick()) if (FeatureSwitches.enabled("flip")) quickTurn(client);
         while (flightKey.consumeClick()) if (FeatureSwitches.enabled("flight")) toggleFlight(client);
@@ -143,7 +153,7 @@ public final class RasmClient implements ClientModInitializer {
         while (menuKey.consumeClick()) { }
         while (flipKey.consumeClick()) { }
         while (flightKey.consumeClick()) { }
-        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey,xrayKey,shieldStunKey,pearlCatchKey})
+        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey,xrayKey,shieldStunKey,pearlCatchKey,autoStunKey,blockEspKey})
             while (key.consumeClick()) { }
     }
 
@@ -246,8 +256,9 @@ public final class RasmClient implements ClientModInitializer {
     }
 
     String bindingLabel(String name) {
-        if (name.equals("auto_stun") || name.equals("block_esp")) return "Menu";
         KeyMapping binding = switch (name) {
+            case "auto_stun" -> autoStunKey;
+            case "block_esp" -> blockEspKey;
             case "panic" -> panicKey;
             case "flip" -> flipKey;
             case "stun_slam" -> stunKey;

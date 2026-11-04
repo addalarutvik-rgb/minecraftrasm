@@ -10,7 +10,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.network.chat.Component;
 
 /** Compact dashboard; categories and pagination keep every control reachable at high GUI scale. */
@@ -79,7 +78,7 @@ final class RasmScreen extends Screen {
                 ()->{ category=name; rememberedCategory=name; page=0; search.setValue(""); refreshCards(); },()->category.equals(name)&&query.isBlank(),false));
         }
         addRenderableWidget(new RasmUi.Control(left+9,top+panelHeight-50,sidebar-12,19,()->"Keybinds",
-            ()->minecraft.setScreen(new KeyBindsScreen(this,minecraft.options)),()->false,false));
+            ()->minecraft.setScreen(new RasmKeybindScreen(this,controls)),()->false,false));
         addRenderableWidget(new RasmUi.Control(left+9,top+panelHeight-27,sidebar-12,19,()->"Panic",
             ()->controls.panic(minecraft),()->false,true)).setTooltip(Tooltip.create(Component.literal("Disable everything • "+controls.bindingLabel("panic"))));
         previous=addRenderableWidget(new RasmUi.Control(contentX+contentWidth-49,top+panelHeight-27,22,19,()->"<",()->{page--;refreshCards();},()->false,false));
