@@ -113,7 +113,7 @@ The installer cannot add Fabric support to a running Lunar session.
 | --- | --- |
 | `[` | Open the Rasm Client menu |
 | End | Panic: disable all Rasm features |
-| R | KB flick + immediate Stun Slam |
+| R | Smooth KB flick + Stun Slam |
 | G | Toggle client-side flight |
 | N | Toggle Nofall |
 | Z | One lunge swap (slots 1 / 3) |
@@ -124,23 +124,21 @@ The installer cannot add Fabric support to a running Lunar session.
 | H | Toggle ore X-ray |
 | J | Shield Stun: slot 1 → axe 8 → slot 1 |
 
-Change every action binding in **Options → Controls → Key Binds → Rasm Client**,
-or click **Rebind keys** in the Rasm menu. Server-permitted flight is unbound by
-default and can also be assigned a key. Minecraft saves these bindings.
-If upgrading from an older build, Minecraft may retain the previous menu key;
-set **Open Rasm menu** to **[** there (or reset that binding to its new default).
-The KB flick rotates out by +180 degrees, synchronizes the current sprint state,
-sends the new facing, and sends an **entity attack in the same client tick**. It
-immediately starts Stun Slam against that same locked target: slot 1 → axe in
-slot 8 after one tick, then a mace in slot 2 one tick after the axe hit.
-The camera returns by -180 degrees after the axe hit (about 50 ms); the mace
-follows with the slightly slower Stun Slam timing. One R press or
-**KB flick + Stun Slam** menu click runs the combination; you no longer need to
-press both buttons. Put an axe in slot 8 and a mace in slot 2. Without those items,
-the ordinary flick still runs and the swap is silently skipped.
-Active swap sequences block a new flick. No block-click/mining action is sent.
-This automates the user's reported working combination; multiplayer displacement
-with the combined button has not been verified here.
+Change bindings inside **[ → Keybinds**. Auto Shield Stun and server-permitted
+flight start unbound. Minecraft saves these bindings. If upgrading from an older
+build, reset **Open Rasm menu** to **[** in that editor if needed.
+
+KB Flick now uses a render-frame smoothstep animation: **150 ms out to +180°**,
+a brief hold until the next attack tick (up to about 50 ms at normal tick rate),
+then **150 ms back along the same arc**. It preserves pitch and the starting yaw,
+including across ±180°. At the midpoint it synchronizes sprint/facing and attacks
+once, then starts the existing Stun Slam follow-up against the locked target if
+the required axe/mace are present. The camera returns smoothly while that swap
+finishes. Active swaps block a new flick; manual swap hotkeys are ignored until the turn
+is finished. Opening a screen, dying, or starting item use cancels the turn at
+its current angle without an extra snap. Panic still restores the starting yaw.
+This changes camera timing, not server knockback or anti-cheat rules; multiplayer
+knockback displacement and server acceptance are not guaranteed.
 
 It first locks the living entity under your crosshair **before** turning, then
 attacks that same target with the reversed facing. Aim at your opponent and press R.
@@ -194,6 +192,25 @@ Lunge/Mace/Stun Slam sequences prevent this action from interfering with them.
 The attack never mines blocks. The server still decides whether the hit disables
 a shield, based on its combat rules and attack state. Live shield-disable behavior
 has not been verified for this new action.
+
+### Automatic Shield Stun
+
+Enable **Combat → Auto Shield Stun**, and keep the **Shield Stun** master switch
+ON. Its toggle can be bound in **[ → Keybinds**. Put an axe in slot **8**.
+When aiming directly at a living player actively blocking with a shield within
+melee reach and line of sight, it selects **1 → 8**, waits for the axe's full
+attack cooldown, attacks once, and returns to **1**. There is at least a one-second
+retry interval, and the target must still be blocking and under the crosshair at
+the hit. This attempts the normal axe shield-disable mechanic; the server decides
+the outcome.
+
+Automation yields while eating, drinking, using a bow, holding your shield up,
+holding attack/use, mining, swinging, using a menu, or running another swap/flick.
+If you start using an item or change slots during the sequence, it cancels without
+sending another slot change. Losing the target, removing the axe, or waiting over
+40 ticks cancels and restores the original slot. Panic, disabling either master
+switch, turning the automation off, and disconnecting stop it. Automation starts
+off each session; manual **J** retains its quick sequence and remains separate.
 
 ## Stun Slam
 
@@ -473,3 +490,12 @@ an online player to `hiphop`, recoloring that group blue, and `/unglow` removing
 that player's outline. Verified the in-client Flight binding can be searched,
 changed to K, cleared with Backspace, and reset to G, with each change written
 to `options.txt`. Lunar compatibility remains unverified.
+
+
+Automatic-shield/smooth-turn validation: build and all 26 unit tests pass;
+installer integration checks pass. Loaded the updated render hook and new menu
+entry in a Fabric 1.21.11 development client, recorded a KB Flick, and confirmed
+intermediate headings and the return to the starting view. Timing tests cover
+the unwrapped arc, late attack-tick midpoint hold, repeated activation, and
+cancellation. Automatic shield disabling still requires multiplayer validation;
+no anti-cheat acceptance claim is made.

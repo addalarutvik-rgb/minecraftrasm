@@ -17,14 +17,16 @@ final class SwapActions {
     private boolean stun;
     private boolean shield;
     private boolean pearl;
+    private boolean autoShield;
+    private int autoTicks, expectedSlot;
     private int returnSlot;
     private LivingEntity stunTarget;
     private int phase;
     private LocalPlayer owner;
     private ClientLevel level;
     boolean lungeActive() { return lunge; }
-    boolean active() { return lunge || mace || stun || shield || pearl; }
-    void stop() { lunge = false; mace = false; stun = false; shield = false; pearl = false; stunTarget = null; phase = 0; owner = null; level = null; }
+    boolean active() { return lunge || mace || stun || shield || pearl || autoShield; }
+    void stop() { lunge = false; mace = false; stun = false; shield = false; pearl = false; autoShield = false; autoTicks = 0; stunTarget = null; phase = 0; owner = null; level = null; }
     void cancel(Minecraft client) {
         if (active() && client.player == owner && client.level == level) restore(client);
         stop();
@@ -79,6 +81,49 @@ final class SwapActions {
         tick(client);
     }
 
+    static boolean busy(Minecraft client) {
+        return client.player == null || client.gameMode == null || !client.player.isAlive()
+            || client.player.isSpectator() || client.player.isSleeping() || client.player.isPassenger()
+            || client.screen != null || client.player.isUsingItem() || client.options.keyUse.isDown()
+            || client.options.keyAttack.isDown() || client.gameMode.isDestroying();
+    }
+    boolean automaticShield(Minecraft client, net.minecraft.world.entity.player.Player target) {
+        if (active() || busy(client) || client.player.swinging
+                || !client.player.getInventory().getItem(7).is(ItemTags.AXES)) return false;
+        stop(); owner = client.player; level = client.level; autoShield = true; stunTarget = target;
+        returnSlot = owner.getInventory().getSelectedSlot();
+        if (!blockingTarget(client)) { stop(); return false; }
+        select(client, 0); expectedSlot = 0;
+        return true;
+    }
+    void cancelAutomaticShield(Minecraft client) {
+        if (autoShield) {
+            if (client.player == owner && !owner.isUsingItem() && owner.getInventory().getSelectedSlot() == expectedSlot) restore(client);
+            stop();
+        }
+    }
+    private boolean blockingTarget(Minecraft client) {
+        client.gameRenderer.pick(1.0F);
+        return stunTarget != null && stunTarget.isAlive() && stunTarget.level() == client.level
+            && stunTarget.isBlocking() && stunTarget.getUseItem().is(Items.SHIELD)
+            && client.hitResult instanceof EntityHitResult hit && hit.getEntity() == stunTarget
+            && owner.hasLineOfSight(stunTarget)
+            && owner.distanceToSqr(stunTarget) <= Math.pow(owner.entityInteractionRange(), 2);
+    }
+    private void tickAutomaticShield(Minecraft client) {
+        // If the user starts an action or manually changes slots, yield without another slot packet.
+        if (busy(client) || owner.getInventory().getSelectedSlot() != expectedSlot) { stop(); return; }
+        if (!FeatureSwitches.enabled("auto_shield") || !FeatureSwitches.enabled("shield_stun")
+                || !owner.getInventory().getItem(7).is(ItemTags.AXES) || ++autoTicks > 40) {
+            restore(client); stop(); return;
+        }
+        if (phase == 3) { select(client, 0); stop(); return; }
+        if (!blockingTarget(client)) { restore(client); stop(); return; }
+        if (phase == 0) { select(client, 7); expectedSlot = 7; phase = 1; return; }
+        if (owner.getAttackStrengthScale(0.0F) < 1.0F) return;
+        entityAttackOrSwing(client, stunTarget); phase = 3;
+    }
+
     // Launch on activation, then use the charge on the next client tick (~50 ms).
     void pearlCatch(Minecraft client) {
         if (active() || !ready(client) || client.screen != null || client.player.isSpectator()) return;
@@ -101,6 +146,7 @@ final class SwapActions {
     void tick(Minecraft client) {
         if (!active()) return;
         if (!ready(client) || owner != client.player || level != client.level) { stop(); return; }
+        if (autoShield) { tickAutomaticShield(client); return; }
         if (client.screen != null) { restore(client); stop(); return; }
         if (pearl) {
             var charge = owner.getInventory().getItem(3);
@@ -140,7 +186,7 @@ final class SwapActions {
             stop();
         }
     }
-    private void restore(Minecraft client) { if (client.player == owner) select(client, (stun || pearl) ? returnSlot : 0); }
+    private void restore(Minecraft client) { if (client.player == owner) select(client, (stun || pearl || autoShield) ? returnSlot : 0); }
     private void select(Minecraft client, int slot) {
         client.player.getInventory().setSelectedSlot(slot);
         client.player.connection.send(new ServerboundSetCarriedItemPacket(slot));

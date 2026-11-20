@@ -29,8 +29,9 @@ final class RasmScreen extends Screen {
     RasmScreen(RasmClient controls) {
         super(Component.literal("Rasm dashboard"));
         this.controls = controls;
-        features.add(new Feature("Combat", "KB Flick", "180 flick + Stun Slam", "flip", () -> controls.quickTurn(minecraft), null, true));
+        features.add(new Feature("Combat", "KB Flick", "Smooth 180 and back + Stun Slam", "flip", () -> controls.quickTurn(minecraft), null, true));
         features.add(new Feature("Combat", "Stun Slam", "Slot 1 > axe 8 > mace 2", "stun_slam", () -> controls.swaps.stunSlam(minecraft), null, true));
+        features.add(new Feature("Combat", "Auto Shield Stun", "Aimed blocking player; pauses when busy", "auto_shield", controls::toggleAutoShield, controls::autoShieldActive, false));
         features.add(new Feature("Combat", "Shield Stun", "Slot 1 > axe 8 > slot 1", "shield_stun", () -> controls.swaps.shieldStun(minecraft), null, true));
         features.add(new Feature("Combat", "Lunge Swap", "Slot 1 > spear 3; one attack", "lunge", () -> controls.swaps.lunge(minecraft), null, true));
         features.add(new Feature("Combat", "Mace Swap", "Slot 1 > mace 2 > slot 1", "mace", () -> controls.swaps.mace(minecraft), null, true));

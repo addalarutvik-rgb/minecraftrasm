@@ -5,6 +5,7 @@
   "client": [
     "MinecraftAttackInvoker",
     "NoFallPacketMixin",
+    "SmoothTurnMixin",
     "EntityGlowMixin",
     "EntityGlowColorMixin",
     "XrayStateMixin",
