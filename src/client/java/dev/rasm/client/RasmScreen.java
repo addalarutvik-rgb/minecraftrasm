@@ -36,6 +36,7 @@ final class RasmScreen extends Screen {
         features.add(new Feature("Combat", "Lunge Swap", "Slot 1 > spear 3; one attack", "lunge", () -> controls.swaps.lunge(minecraft), null, true));
         features.add(new Feature("Combat", "Mace Swap", "Slot 1 > mace 2 > slot 1", "mace", () -> controls.swaps.mace(minecraft), null, true));
         features.add(new Feature("Movement", "Pearl Catch", "Pearl 5 > wind charge 4", "pearl_catch", () -> controls.swaps.pearlCatch(minecraft), null, true));
+        features.add(new Feature("Movement", "Movement Recorder", "Record clips, checkpoints and sequences", "movement_replay", () -> minecraft.setScreen(new MovementScreen(this)), MovementRecorder.INSTANCE::active, false));
         features.add(new Feature("Movement", "Flight", "Camera-relative flight", "flight", () -> controls.toggleFlight(minecraft), controls::clientFlightActive, false));
         features.add(new Feature("Movement", "NoFall", "Toggle fall packet handling", "nofall", () -> NoFall.toggle(minecraft), NoFall::active, false));
         features.add(new Feature("Movement", "Server Flight", "Requires server permission", "server_flight", () -> controls.requestServerFlight(minecraft), null, false));
@@ -163,7 +164,7 @@ final class RasmScreen extends Screen {
             if(pinned.contains(feature.id())) g.fill(x+2,y+5,x+4,y+28,RasmUi.accent());
             RasmUi.icon(g,feature.category,x+7,y+8,permitted?RasmUi.accent():RasmUi.DIM);
             String status=!permitted?"LOCK":feature.enabled==null?"RUN":running?"ON":"OFF";
-            if(feature.id().equals("block_esp")||feature.name.equals("Custom Glow")) status=permitted?"OPEN":"LOCK";
+            if(feature.id().equals("movement_replay")||feature.id().equals("block_esp")||feature.name.equals("Custom Glow")) status=permitted?"OPEN":"LOCK";
             int statusWidth=font.width(status)+10;
             RasmUi.round(g,x+w-statusWidth-6,y+8,statusWidth,16,running?RasmUi.blend(RasmUi.SURFACE,RasmUi.accent(),0.2f):0xFF111824);
             g.drawString(font,status,x+w-statusWidth-1,y+12,running?RasmUi.accent():RasmUi.MUTED,false);

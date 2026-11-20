@@ -6,6 +6,8 @@
     "MinecraftAttackInvoker",
     "NoFallPacketMixin",
     "SmoothTurnMixin",
+    "MovementInputMixin",
+    "ReplayHotbarMixin",
     "EntityGlowMixin",
     "EntityGlowColorMixin",
     "XrayStateMixin",

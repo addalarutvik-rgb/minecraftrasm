@@ -499,3 +499,62 @@ intermediate headings and the return to the starting view. Timing tests cover
 the unwrapped arc, late attack-tick midpoint hold, repeated activation, and
 cancellation. Automatic shield disabling still requires multiplayer validation;
 no anti-cheat acceptance claim is made.
+
+## Movement clip editor
+
+Open **[ → Movement → Movement Recorder**. **5** (the number row, not numpad)
+starts the selected mode and pressing **5 again stops it**:
+
+- **Mode: Record** (default): stand still on a block, close the menu, press 5,
+  move/jump normally, and press 5 again to save a clip. **Record new clip** also
+  starts recording. Each clip is saved separately and appended to the sequence.
+- **Mode: Replay**: return to the first sequence clip's start, stand still on the
+  ground, close the menu, and press 5. **Play sequence** also starts playback.
+  Clips run back-to-back once in the sequence order. Press 5 again to stop.
+
+The **Clips** tab lists the saved clips. **Add** appends that clip to the sequence;
+you can add the same clip repeatedly. **X** deletes a clip and its sequence entries.
+The **Sequence** tab shows the playback order; use **↑ / ↓** to reorder entries
+and **X** to remove an entry without deleting its clip. Select a clip to display
+its starting coordinates. The library holds **16 clips**, up to **60 seconds each**,
+and a sequence holds **32 entries**. Recordings last for this world/player session;
+disconnect, respawn or dimension changes clear the library.
+
+### Checkpoints
+
+Bind **Movement checkpoint: split recording / mark selected clip** in the client's
+**Keybinds** menu (initially unbound). While recording, pressing it saves the section
+ending at your current position, marks its end as a checkpoint, and immediately
+starts a new clip. Both are automatically appended to the sequence. For saved
+clips, select one and click **Toggle end checkpoint** to add/remove a checkpoint
+at that clip's recorded endpoint. Opening a menu saves/stops the current recording,
+so use the checkpoint hotkey for a seamless split while moving.
+
+At a checkpoint, playback checks that you reached within **1.5 blocks** of the
+recorded displacement before continuing; if not, it stops. Checkpoints never
+teleport you. Later clips run relative to your current position, using their
+recorded headings, so the same clip can repeat farther along a route. Return
+within **0.8 blocks** of the first clip's displayed starting position to begin a
+sequence, and use a ground-start clip as its first entry.
+
+Forward/back/strafe, jump, sneak, sprint and camera direction are sampled at 20
+ticks/second. Playback uses normal movement inputs and releases them afterward.
+Use the same terrain, equipment and speed effects: physics, collisions, server
+corrections and latency can change the result. Attacks, item use, inventory actions,
+flight and combat macros are not recorded. Combat/flight macros are blocked during
+recording/replay; attack/use cancels playback. Opening a menu, Panic, or switching
+the recorder's master switch off stops it. Successful actions stay silent in chat;
+status is shown in the editor.
+
+Both recorder controls are rebindable in **[ → Keybinds**. The start/stop key takes
+priority over a conflicting hotbar key while the recorder master switch is on;
+disable the feature or rebind it to restore that hotbar shortcut. Existing clips
+remain available when stopped or disabled. Changing modes never starts playback
+by itself.
+
+Movement editor validation: build and all 32 unit tests pass, along with installer
+integration checks. In a Fabric 1.21.11 development client, verified number-row 5
+record/stop, separate saved clips, duplicate sequence entries, checkpoint markers,
+and Record/Replay mode selection. A walking clip replayed twice with checkpoints
+and completed at twice its recorded displacement on a flat test platform. Hotbar
+selection stayed unchanged. Multiplayer route accuracy remains unverified.

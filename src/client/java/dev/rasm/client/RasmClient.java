@@ -25,6 +25,8 @@ public final class RasmClient implements ClientModInitializer {
     private Entity flickTarget;
     private boolean autoShield;
     private int shieldRetry;
+    private KeyMapping checkpointKey;
+    private KeyMapping replayKey;
     private KeyMapping autoShieldKey;
     private boolean autoStun;
     private final FallTrigger autoFall = new FallTrigger();
@@ -63,6 +65,8 @@ public final class RasmClient implements ClientModInitializer {
         xrayKey = key("xray", GLFW.GLFW_KEY_H, category);
         ghostKey = key("ghost", GLFW.GLFW_KEY_B, category);
         serverFlightKey = key("server_flight", GLFW.GLFW_KEY_UNKNOWN, category);
+        checkpointKey = key("movement_checkpoint", GLFW.GLFW_KEY_UNKNOWN, category);
+        replayKey = key("movement_replay", GLFW.GLFW_KEY_5, category);
         autoShieldKey = key("auto_shield", GLFW.GLFW_KEY_UNKNOWN, category);
         autoStunKey = key("auto_stun", GLFW.GLFW_KEY_UNKNOWN, category);
         blockEspKey = key("block_esp", GLFW.GLFW_KEY_UNKNOWN, category);
@@ -79,9 +83,11 @@ public final class RasmClient implements ClientModInitializer {
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             if (panicKey.consumeClick()) panic(client);
         });
+        ClientTickEvents.START_CLIENT_TICK.register(MovementRecorder.INSTANCE::tick);
         ClientTickEvents.START_CLIENT_TICK.register(flight::tick);
         ClientTickEvents.START_CLIENT_TICK.register(NoFall::tick);
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            MovementRecorder.INSTANCE.clear();
             flight.stop();
             swaps.stop(); ghost.clear(); EntityGlow.reset();
             NoFall.reset(); Xray.reset(); BlockEsp.reset(); autoStun = false; autoShield = false; shieldRetry = 0; autoFall.reset();
@@ -97,6 +103,7 @@ public final class RasmClient implements ClientModInitializer {
     }
 
     void panic(Minecraft client) {
+        MovementRecorder.INSTANCE.stop();
         FeatureSwitches.disableAll();
         autoStun = false; autoShield = false; shieldRetry = 0; autoFall.reset(); BlockEsp.reset();
         swaps.cancel(client);
@@ -111,7 +118,7 @@ public final class RasmClient implements ClientModInitializer {
         ghost.clear();
         Xray.disable(client);
         drainKeys();
-        if (client.screen instanceof RasmScreen || client.screen instanceof BlockEspScreen) client.setScreen(null);
+        if (client.screen instanceof RasmScreen || client.screen instanceof BlockEspScreen || client.screen instanceof MovementScreen) client.setScreen(null);
     }
 
     private void tick(Minecraft client) {
@@ -139,6 +146,9 @@ public final class RasmClient implements ClientModInitializer {
         }
         while (menuKey.consumeClick()) client.setScreen(new RasmScreen(this));
         if (client.screen != null) { drainKeys(); return; }
+        while (replayKey.consumeClick()) if (FeatureSwitches.enabled("movement_replay")) MovementRecorder.INSTANCE.press(client);
+        while (checkpointKey.consumeClick()) if (FeatureSwitches.enabled("movement_replay")) MovementRecorder.INSTANCE.checkpoint(client);
+        if (MovementRecorder.INSTANCE.active()) { drainKeys(); return; }
         while (autoShieldKey.consumeClick()) if (FeatureSwitches.enabled("auto_shield")) toggleAutoShield();
         while (autoStunKey.consumeClick()) if (FeatureSwitches.enabled("auto_stun")) toggleAutoStun();
         while (blockEspKey.consumeClick()) if (FeatureSwitches.enabled("block_esp")) client.setScreen(new BlockEspScreen(new RasmScreen(this)));
@@ -163,7 +173,7 @@ public final class RasmClient implements ClientModInitializer {
         while (menuKey.consumeClick()) { }
         while (flipKey.consumeClick()) { }
         while (flightKey.consumeClick()) { }
-        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey,xrayKey,shieldStunKey,pearlCatchKey,autoStunKey,blockEspKey,autoShieldKey})
+        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey,xrayKey,shieldStunKey,pearlCatchKey,autoStunKey,blockEspKey,autoShieldKey,replayKey,checkpointKey})
             while (key.consumeClick()) { }
     }
 
@@ -172,7 +182,7 @@ public final class RasmClient implements ClientModInitializer {
         if (client.player.isPassenger() || client.player.isSleeping()) {
             return;
         }
-        if (turn.active() || swaps.active() || client.player.isUsingItem()) return;
+        if (MovementRecorder.INSTANCE.active() || turn.active() || swaps.active() || client.player.isUsingItem()) return;
         // Capture the intended opponent before rotating away. Picking only after
         // the turn loses a front-facing target and produces ordinary rear hits.
         client.gameRenderer.pick(1.0F);
@@ -242,6 +252,7 @@ public final class RasmClient implements ClientModInitializer {
         if (enabled) return;
         Minecraft client = Minecraft.getInstance();
         switch (id) {
+            case "movement_replay" -> MovementRecorder.INSTANCE.stop();
             case "flight" -> flight.stop();
             case "server_flight" -> flight.panic(client);
             case "nofall" -> NoFall.reset();
@@ -263,6 +274,18 @@ public final class RasmClient implements ClientModInitializer {
         }
         drainKeys();
     }
+    static boolean movementBusy() {
+        var c=Minecraft.getInstance();
+        return instance == null || instance.turn.active() || instance.swaps.active() || instance.flight.active()
+            || c.player == null || c.player.isUsingItem() || c.player.getAbilities().flying || c.player.isFallFlying();
+    }
+    public static boolean replayUsesHotbar(KeyMapping key) {
+        if (instance == null || !FeatureSwitches.enabled("movement_replay")) return false;
+        for (var hotbar : Minecraft.getInstance().options.keyHotbarSlots)
+            if (hotbar == key && key.same(instance.replayKey)) return true;
+        return false;
+    }
+
     boolean autoShieldActive() { return autoShield; }
     void toggleAutoShield() { autoShield = !autoShield; if (!autoShield) swaps.cancelAutomaticShield(Minecraft.getInstance()); }
     private void tickAutoShield(Minecraft client) {
@@ -299,6 +322,8 @@ public final class RasmClient implements ClientModInitializer {
 
     String bindingLabel(String name) {
         KeyMapping binding = switch (name) {
+            case "movement_checkpoint" -> checkpointKey;
+            case "movement_replay" -> replayKey;
             case "auto_shield" -> autoShieldKey;
             case "auto_stun" -> autoStunKey;
             case "block_esp" -> blockEspKey;

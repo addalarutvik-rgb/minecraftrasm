@@ -3,6 +3,8 @@
   "key.rasmclient.auto_shield": "Toggle Auto Shield Stun",
   "key.rasmclient.auto_stun": "Toggle Auto Stun Slam",
   "key.rasmclient.block_esp": "Open Block ESP",
+  "key.rasmclient.movement_checkpoint": "Movement checkpoint: split recording / mark selected clip",
+  "key.rasmclient.movement_replay": "Start / stop movement (selected editor mode)",
   "key.rasmclient.menu": "Open Rasm menu",
   "key.rasmclient.flip": "Smooth KB flick + Stun Slam",
   "key.rasmclient.flight": "Toggle client flight",
