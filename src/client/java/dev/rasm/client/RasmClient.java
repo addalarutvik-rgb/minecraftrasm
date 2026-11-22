@@ -25,6 +25,7 @@ public final class RasmClient implements ClientModInitializer {
     private Entity flickTarget;
     private boolean autoShield;
     private int shieldRetry;
+    private KeyMapping clearVisionKey;
     private KeyMapping checkpointKey;
     private KeyMapping replayKey;
     private KeyMapping autoShieldKey;
@@ -65,6 +66,7 @@ public final class RasmClient implements ClientModInitializer {
         xrayKey = key("xray", GLFW.GLFW_KEY_H, category);
         ghostKey = key("ghost", GLFW.GLFW_KEY_B, category);
         serverFlightKey = key("server_flight", GLFW.GLFW_KEY_UNKNOWN, category);
+        clearVisionKey = key("clear_vision", GLFW.GLFW_KEY_UNKNOWN, category);
         checkpointKey = key("movement_checkpoint", GLFW.GLFW_KEY_UNKNOWN, category);
         replayKey = key("movement_replay", GLFW.GLFW_KEY_5, category);
         autoShieldKey = key("auto_shield", GLFW.GLFW_KEY_UNKNOWN, category);
@@ -90,7 +92,7 @@ public final class RasmClient implements ClientModInitializer {
             MovementRecorder.INSTANCE.clear();
             flight.stop();
             swaps.stop(); ghost.clear(); EntityGlow.reset();
-            NoFall.reset(); Xray.reset(); BlockEsp.reset(); autoStun = false; autoShield = false; shieldRetry = 0; autoFall.reset();
+            ClearVision.reset(); NoFall.reset(); Xray.reset(); BlockEsp.reset(); autoStun = false; autoShield = false; shieldRetry = 0; autoFall.reset();
         });
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
     }
@@ -113,6 +115,7 @@ public final class RasmClient implements ClientModInitializer {
         }
         turn.cancel();
         flight.panic(client);
+        ClearVision.reset();
         NoFall.reset();
         EntityGlow.reset();
         ghost.clear();
@@ -146,6 +149,7 @@ public final class RasmClient implements ClientModInitializer {
         }
         while (menuKey.consumeClick()) client.setScreen(new RasmScreen(this));
         if (client.screen != null) { drainKeys(); return; }
+        while (clearVisionKey.consumeClick()) if (FeatureSwitches.enabled("clear_vision")) ClearVision.toggle();
         while (replayKey.consumeClick()) if (FeatureSwitches.enabled("movement_replay")) MovementRecorder.INSTANCE.press(client);
         while (checkpointKey.consumeClick()) if (FeatureSwitches.enabled("movement_replay")) MovementRecorder.INSTANCE.checkpoint(client);
         if (MovementRecorder.INSTANCE.active()) { drainKeys(); return; }
@@ -173,7 +177,7 @@ public final class RasmClient implements ClientModInitializer {
         while (menuKey.consumeClick()) { }
         while (flipKey.consumeClick()) { }
         while (flightKey.consumeClick()) { }
-        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey,xrayKey,shieldStunKey,pearlCatchKey,autoStunKey,blockEspKey,autoShieldKey,replayKey,checkpointKey})
+        for (KeyMapping key : new KeyMapping[]{noFallKey,lungeKey,maceKey,ghostKey,serverFlightKey,stunKey,xrayKey,shieldStunKey,pearlCatchKey,autoStunKey,blockEspKey,autoShieldKey,replayKey,checkpointKey,clearVisionKey})
             while (key.consumeClick()) { }
     }
 
@@ -252,6 +256,7 @@ public final class RasmClient implements ClientModInitializer {
         if (enabled) return;
         Minecraft client = Minecraft.getInstance();
         switch (id) {
+            case "clear_vision" -> ClearVision.reset();
             case "movement_replay" -> MovementRecorder.INSTANCE.stop();
             case "flight" -> flight.stop();
             case "server_flight" -> flight.panic(client);
@@ -322,6 +327,7 @@ public final class RasmClient implements ClientModInitializer {
 
     String bindingLabel(String name) {
         KeyMapping binding = switch (name) {
+            case "clear_vision" -> clearVisionKey;
             case "movement_checkpoint" -> checkpointKey;
             case "movement_replay" -> replayKey;
             case "auto_shield" -> autoShieldKey;

@@ -1,25 +1,25 @@
-# Rasm Client
+# DiddyMore Client
 
-[Download Rasm Client 0.1.0](https://github.com/addalarutvik-rgb/minecraftrasm/raw/refs/heads/main/downloads/rasm-client-0.1.0.jar)
+[Download DiddyMore Client 0.1.0](https://github.com/addalarutvik-rgb/minecraftrasm/raw/refs/heads/main/downloads/diddymore-client-0.1.0.jar)
 
 Install with Fabric Loader and Fabric API for Minecraft **1.21.11**. Save the JAR
 in your Minecraft instance's `mods` folder without extracting it.
 
 A Fabric mod for **Minecraft Java 1.21.11** using Java 21, with client-side
 flight and an optional server-permitted flight mode. Client-side flight only
-requires Fabric Loader, Fabric API, and Rasm on your own client.
+requires Fabric Loader, Fabric API, and DiddyMore on your own client.
 
 ## Desktop installer
 
-[Download the standalone installer](https://github.com/addalarutvik-rgb/minecraftrasm/raw/refs/heads/main/downloads/rasm-installer.jar).
+[Download the standalone installer](https://github.com/addalarutvik-rgb/minecraftrasm/raw/refs/heads/main/downloads/diddymore-installer.jar).
 Double-click it with Java 21 installed, or run `java -jar rasm-installer.jar`.
 Close Minecraft, choose your instance folder (the folder containing `mods`), and
-click **Install / update Rasm**. Start your Fabric 1.21.11 installation and press
+click **Install / update DiddyMore**. Start your Fabric 1.21.11 installation and press
 `[` to open the dashboard. Fabric Loader and Fabric API must already be installed.
 For launchers with separate instances, use **Browse** to select the right instance.
 
 The installer includes the client; no separate mod download or manual file copy
-is needed. It backs up previous Rasm JARs to `rasm-backups` outside `mods`, preserves
+is needed. It backs up previous DiddyMore JARs to `rasm-backups` outside `mods`, preserves
 other mods, and refuses to overwrite an unrelated file using the same filename.
 Do not put the installer JAR itself in `mods`.
 
@@ -32,7 +32,7 @@ Windows and macOS have not been tested here.
 
 ## Dashboard
 
-![Rasm control center](docs/dashboard.png)
+![DiddyMore control center](docs/dashboard.png)
 
 ![Block library](docs/block-library.png)
 
@@ -92,9 +92,9 @@ blocks; cancels combat sequences; restores an active swap's return slot and a
 pending flick's original yaw; and discards queued feature hotkeys. The dashboard
 closes. All feature master switches remain off until you enable them again. The key also works in
 chat/inventory screens, except the keybind editor so you can rebind it normally.
-This disables Rasm features, not Minecraft's vanilla glow or creative abilities.
-Server-permitted Rasm flight receives an explicit disable-only request when the
-server supports it; multiplayer servers need this updated Rasm version for that
+This disables DiddyMore features, not Minecraft's vanilla glow or creative abilities.
+Server-permitted DiddyMore flight receives an explicit disable-only request when the
+server supports it; multiplayer servers need this updated DiddyMore version for that
 request. Existing server-granted permissions are preserved.
 
 ## Lunar on Windows
@@ -111,8 +111,8 @@ The installer cannot add Fabric support to a running Lunar session.
 
 | Default key | Action |
 | --- | --- |
-| `[` | Open the Rasm Client menu |
-| End | Panic: disable all Rasm features |
+| `[` | Open the DiddyMore Client menu |
+| End | Panic: disable all DiddyMore features |
 | R | Smooth KB flick + Stun Slam |
 | G | Toggle client-side flight |
 | N | Toggle Nofall |
@@ -126,7 +126,7 @@ The installer cannot add Fabric support to a running Lunar session.
 
 Change bindings inside **[ → Keybinds**. Auto Shield Stun and server-permitted
 flight start unbound. Minecraft saves these bindings. If upgrading from an older
-build, reset **Open Rasm menu** to **[** in that editor if needed.
+build, reset **Open DiddyMore menu** to **[** in that editor if needed.
 
 KB Flick now uses a render-frame smoothstep animation: **150 ms out to +180°**,
 a brief hold until the next attack tick (up to about 50 ms at normal tick rate),
@@ -236,12 +236,12 @@ Glow commands run locally and successful commands stay silent:
 | --- | --- |
 | `/glow players red` or `/glow @a red` | Red outlines for loaded players |
 | `/glow creeper green` | Green outlines for creepers |
-| `/glow Rasmore hiphop` | Assign online player Rasmore to local group hiphop |
+| `/glow DiddyMoreore hiphop` | Assign online player DiddyMoreore to local group hiphop |
 | `/glow Alex hiphop` | Add Alex to the same group |
 | `/glow hiphop blue` | Turn every member of hiphop blue |
-| `/unglow hostiles` | Remove Rasm glow from hostile mobs |
-| `/unglow Rasmore` | Exclude that player, even when all players glow |
-| `/unglow creeper` | Remove Rasm glow from creepers |
+| `/unglow hostiles` | Remove DiddyMore glow from hostile mobs |
+| `/unglow DiddyMoreore` | Exclude that player, even when all players glow |
+| `/unglow creeper` | Remove DiddyMore glow from creepers |
 | `/unglow hiphop` | Remove that group's glow and group definition |
 | `/glow clear` or `/unglow clear` | Clear all local glow rules and groups |
 
@@ -269,7 +269,7 @@ All rules and groups reset on disconnect or Panic.
 
 ## In-client keybind editor
 
-Open **[ → Keybinds** in the Rasm menu. Search any registered Rasm control,
+Open **[ → Keybinds** in the DiddyMore menu. Search any registered DiddyMore control,
 including Flight, Pearl Catch, menu access, Panic, Auto Stun Slam, and Block ESP.
 Click its binding and press a keyboard key or mouse button. **Backspace** unbinds;
 **Esc** cancels capture. **Reset** restores that control's default. Red bindings
@@ -324,14 +324,14 @@ such as lava, suffocation, or the void.
 ## Optional server-permitted flight
 
 1. The server owner installs **Fabric Loader for 1.21.11**, **Fabric API for
-   1.21.11**, and the Rasm mod JAR in the server's `mods` folder.
-2. Start the server once. Rasm creates `config/rasm-flight-allowed-players.txt`
+   1.21.11**, and the DiddyMore mod JAR in the server's `mods` folder.
+2. Start the server once. DiddyMore creates `config/rasm-flight-allowed-players.txt`
    in the server's working directory, initially granting no multiplayer access.
 3. Stop the server. Add the UUID of each permitted player, one per line. You can
    find a connected player's UUID in the server's `usercache.json`. A denied
    flight request also displays the requesting player's UUID.
 4. Restart the server to load the list. Each permitted player installs Fabric,
-   Fabric API, and the same Rasm JAR on their client, then uses **Request server-permitted flight** in the `[` menu.
+   Fabric API, and the same DiddyMore JAR on their client, then uses **Request server-permitted flight** in the `[` menu.
 
 Example allowlist (replace this example UUID with your actual player UUID):
 
@@ -343,7 +343,7 @@ Example allowlist (replace this example UUID with your actual player UUID):
 The server checks the actual sender's UUID; clients cannot request flight for
 other players or grant themselves permission. Invalid configuration disables
 multiplayer flight and logs the error. Edit the file and restart the server to
-change permissions. A server without Rasm displays an unsupported-server message
+change permissions. A server without DiddyMore displays an unsupported-server message
 on the client instead of receiving an unsupported flight request.
 
 The single-player world's owner is allowed automatically. LAN guests need to be
@@ -352,10 +352,10 @@ must be listed. The same JAR can be installed on either side.
 
 Flight changes server-authoritative abilities while keeping survival mode.
 Use Jump to ascend and Sneak to descend. Vanilla double-tap Jump also starts/stops
-flying while permission is enabled. Use the same menu button to revoke Rasm's grant. Disabling in
+flying while permission is enabled. Use the same menu button to revoke DiddyMore's grant. Disabling in
 midair can cause fall damage after you start falling. Flight is reset on respawn,
 disconnect, and server shutdown. Creative/spectator abilities remain with vanilla.
-Existing flight permission is restored when a Rasm grant ends.
+Existing flight permission is restored when a DiddyMore grant ends.
 
 This optional mode requires server support and permission. Client-side flight
 remains available separately using G. The server-permitted mode does not require enabling
@@ -380,7 +380,7 @@ Tests: `./gradlew test`. The wrapper verifies Gradle's SHA-256 checksum.
 21 JUnit tests passed (five movement tests, four permission tests, three
 turn-state tests, three NoFall selection tests, three backward target-selection tests,
 two once-per-fall trigger tests, and one master-switch/Panic test).
-The dedicated-server launch loaded Rasm in the server environment and stopped
+The dedicated-server launch loaded DiddyMore in the server environment and stopped
 at Minecraft's EULA gate (`run/eula.txt` remains `eula=false`).
 
 The client was also launched under a virtual display into a disposable survival
@@ -409,7 +409,7 @@ Use a disposable world and a test Fabric server:
 - Test toggle-off, respawn, disconnect/rejoin, server restart, and creative/
   spectator transitions. Verify pre-existing flight permission is preserved.
 - Confirm single-player supports both modes without an allowlist entry.
-- Join a server without Rasm and confirm client flight can be toggled locally,
+- Join a server without DiddyMore and confirm client flight can be toggled locally,
   while the server-flight menu button displays the unsupported message.
 
 Automated movement, permission, and turn tests do not replace these interactive checks.
@@ -558,3 +558,24 @@ record/stop, separate saved clips, duplicate sequence entries, checkpoint marker
 and Record/Replay mode selection. A walking clip replayed twice with checkpoints
 and completed at twice its recorded displacement on a flat test platform. Hotbar
 selection stayed unchanged. Multiplayer route accuracy remains unverified.
+
+
+## Clear Vision
+
+Enable **[ → Visuals → Clear Vision** to suppress Blindness fog and Darkness
+fog/pulsing dimness. Its optional keybind is initially unbound and can be assigned
+inside the client's Keybinds menu. The master switch and Panic disable it;
+disconnecting resets it. It changes rendering only: effects can still appear in
+the HUD and their server-side durations/mechanics remain intact. Switching it off
+restores the visuals immediately while effects are still active. Ordinary night,
+cave lighting, water/lava fog and other effects remain normal.
+
+The client is now named **DiddyMore Client** in its menu, mod metadata, keybinds
+and installer. The internal `rasmclient` mod ID is retained so existing bindings
+and installer upgrade detection continue to work. Replace the old JAR rather than
+installing both copies.
+
+Clear Vision/rename validation: all 32 unit tests and installer integration checks
+pass. In Fabric 1.21.11, applied Blindness and Darkness together, confirmed fog and
+dimming with Clear Vision off, normal visibility with it on, and restored effect
+visuals after Panic. Confirmed the renamed dashboard and packaged mod metadata.

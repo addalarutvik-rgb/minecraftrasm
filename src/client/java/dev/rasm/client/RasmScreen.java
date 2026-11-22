@@ -27,7 +27,7 @@ final class RasmScreen extends Screen {
     }
 
     RasmScreen(RasmClient controls) {
-        super(Component.literal("Rasm dashboard"));
+        super(Component.literal("DiddyMore dashboard"));
         this.controls = controls;
         features.add(new Feature("Combat", "KB Flick", "Smooth 180 and back + Stun Slam", "flip", () -> controls.quickTurn(minecraft), null, true));
         features.add(new Feature("Combat", "Stun Slam", "Slot 1 > axe 8 > mace 2", "stun_slam", () -> controls.swaps.stunSlam(minecraft), null, true));
@@ -40,6 +40,7 @@ final class RasmScreen extends Screen {
         features.add(new Feature("Movement", "Flight", "Camera-relative flight", "flight", () -> controls.toggleFlight(minecraft), controls::clientFlightActive, false));
         features.add(new Feature("Movement", "NoFall", "Toggle fall packet handling", "nofall", () -> NoFall.toggle(minecraft), NoFall::active, false));
         features.add(new Feature("Movement", "Server Flight", "Requires server permission", "server_flight", () -> controls.requestServerFlight(minecraft), null, false));
+        features.add(new Feature("Visuals", "Clear Vision", "Remove Blindness and Darkness visuals", "clear_vision", ClearVision::toggle, ClearVision::active, false));
         features.add(new Feature("Visuals", "X-ray", "Reveal full ore blocks", "xray", () -> Xray.toggle(minecraft), Xray::active, false));
         features.add(new Feature("Visuals", "Ghost Block", "Place glass beneath your feet", "ghost", () -> controls.ghost.place(minecraft), null, false));
         features.add(new Feature("Visuals", "Clear Ghosts", "Remove every ghost block", "", () -> controls.ghost.clear(), null, false));
@@ -113,7 +114,7 @@ final class RasmScreen extends Screen {
         g.fill(left+sidebar,top+43,left+sidebar+1,top+panelHeight-8,RasmUi.BORDER);
         RasmUi.round(g,left+11,top+12,21,21,RasmUi.blend(RasmUi.SURFACE,RasmUi.accent(),0.2f));
         RasmUi.icon(g,"All",left+13,top+14,RasmUi.accent());
-        g.drawString(font,"R A S M",left+40,top+12,RasmUi.TEXT,false);
+        g.drawString(font,"DiddyMore",left+40,top+12,RasmUi.TEXT,false);
         RasmUi.small(g,"CONTROL CENTER",left+40,top+25,95,RasmUi.MUTED);
         int searchWidth=Math.min(248,panelWidth-166);
         RasmUi.box(g,left+panelWidth-searchWidth-45,top+9,searchWidth,25,RasmUi.SURFACE,search.isFocused()?RasmUi.accent():RasmUi.BORDER);

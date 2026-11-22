@@ -1,11 +1,12 @@
 {
-  "key.category.rasmclient.controls": "Rasm Client",
+  "key.category.rasmclient.controls": "DiddyMore Client",
   "key.rasmclient.auto_shield": "Toggle Auto Shield Stun",
   "key.rasmclient.auto_stun": "Toggle Auto Stun Slam",
   "key.rasmclient.block_esp": "Open Block ESP",
   "key.rasmclient.movement_checkpoint": "Movement checkpoint: split recording / mark selected clip",
   "key.rasmclient.movement_replay": "Start / stop movement (selected editor mode)",
-  "key.rasmclient.menu": "Open Rasm menu",
+  "key.rasmclient.clear_vision": "Toggle Clear Vision (Blindness / Darkness)",
+  "key.rasmclient.menu": "Open DiddyMore menu",
   "key.rasmclient.flip": "Smooth KB flick + Stun Slam",
   "key.rasmclient.flight": "Toggle client flight",
   "key.rasmclient.nofall": "Toggle Nofall",
@@ -17,5 +18,5 @@
   "key.rasmclient.xray": "Toggle ore X-ray",
   "key.rasmclient.pearl_catch": "Pearl Catch: pearl 5 to wind charge 4",
   "key.rasmclient.shield_stun": "Shield Stun: slot 1 to axe 8 to slot 1",
-  "key.rasmclient.panic": "Panic: disable all Rasm features"
+  "key.rasmclient.panic": "Panic: disable all DiddyMore features"
 }

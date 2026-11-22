@@ -22,11 +22,11 @@ public final class RasmInstaller {
 
     private static void showWindow() {
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception ignored) { }
-        JFrame frame = new JFrame("Rasm • Client setup");
+        JFrame frame = new JFrame("DiddyMore • Client setup");
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         JPanel root = new JPanel(new BorderLayout(0, 18));
         root.setBorder(BorderFactory.createEmptyBorder(24, 26, 24, 26));
-        JLabel intro = new JLabel("<html><h1>RASM</h1>Install or update your client.<br><br>"
+        JLabel intro = new JLabel("<html><h1>DiddyMore</h1>Install or update your client.<br><br>"
             + "Choose the Minecraft instance folder that contains <b>mods</b>.<br>"
             + "Requires Minecraft 1.21.11, Fabric, and Fabric API.<br>"
             + "Close Minecraft before installing, then restart it.<br>"
@@ -45,9 +45,9 @@ public final class RasmInstaller {
         selection.add(browse, BorderLayout.EAST);
         root.add(selection, BorderLayout.CENTER);
         JPanel footer = new JPanel(new BorderLayout(0, 10));
-        JLabel status = new JLabel("Existing Rasm versions are backed up; other mods stay in place.");
+        JLabel status = new JLabel("Existing DiddyMore versions are backed up; other mods stay in place.");
         footer.add(status, BorderLayout.NORTH);
-        JButton install = new JButton("Install / update Rasm");
+        JButton install = new JButton("Install / update DiddyMore");
         install.addActionListener(event -> {
             install.setEnabled(false);
             String selectedFolder = folder.getText().trim();
@@ -106,7 +106,7 @@ public final class RasmInstaller {
                 if (payload == null) throw new IOException("Installer payload is missing. Download the installer again.");
                 Files.copy(payload, staged, StandardCopyOption.REPLACE_EXISTING);
             }
-            if (!isRasm(staged)) throw new IOException("Installer payload is not a valid Rasm mod.");
+            if (!isRasm(staged)) throw new IOException("Installer payload is not a valid DiddyMore mod.");
             if (!oldVersions.isEmpty()) {
                 Path backupRoot = instance.resolve("rasm-backups");
                 Files.createDirectories(backupRoot);

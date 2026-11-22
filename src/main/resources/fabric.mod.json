@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "rasmclient",
   "version": "${version}",
-  "name": "Rasm Client",
+  "name": "DiddyMore Client",
   "description": "Quick-turn controls, client-side flight, and optional server-permitted flight.",
   "environment": "*",
   "entrypoints": {

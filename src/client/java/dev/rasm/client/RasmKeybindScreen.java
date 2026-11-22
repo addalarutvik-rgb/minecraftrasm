@@ -22,7 +22,7 @@ final class RasmKeybindScreen extends Screen {
     private String query = "";
     private EditBox search;
     RasmKeybindScreen(Screen parent, RasmClient controls) {
-        super(Component.literal("Rasm keybinds"));
+        super(Component.literal("DiddyMore keybinds"));
         this.parent = parent; bindings = controls.bindings();
     }
     @Override protected void init() {

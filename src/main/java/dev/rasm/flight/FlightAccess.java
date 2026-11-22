@@ -16,7 +16,7 @@ public final class FlightAccess {
     public static FlightAccess load(Path file) throws IOException {
         if (!Files.exists(file)) {
             Files.createDirectories(file.toAbsolutePath().getParent());
-            Files.writeString(file, "# Rasm multiplayer flight: one player UUID per line.\n"
+            Files.writeString(file, "# DiddyMore multiplayer flight: one player UUID per line.\n"
                 + "# Only listed players may toggle flight. Restart the server after editing.\n");
         }
         Set<UUID> allowed = new HashSet<>();

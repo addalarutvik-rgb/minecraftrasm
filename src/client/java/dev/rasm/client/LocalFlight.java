@@ -69,7 +69,7 @@ final class LocalFlight {
     void requestServerFlight(Minecraft client) {
         if (client.player == null) return;
         if (!ClientPlayNetworking.canSend(FlightTogglePayload.TYPE)) {
-            message(client, "This server does not support permission-based Rasm flight. Use client flight with G.");
+            message(client, "This server does not support permission-based DiddyMore flight. Use client flight with G.");
             return;
         }
         stop();
@@ -83,6 +83,6 @@ final class LocalFlight {
     }
 
     private void message(Minecraft client, String text) {
-        if (client.player != null) client.player.displayClientMessage(Component.literal("Rasm: " + text), false);
+        if (client.player != null) client.player.displayClientMessage(Component.literal("DiddyMore: " + text), false);
     }
 }
