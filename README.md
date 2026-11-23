@@ -65,15 +65,17 @@ and Panic always remain available. Switches last for the current client session.
 Panic sets **all master switches OFF**, so hotkeys cannot restart a feature until
 you explicitly enable its switch again.
 
-**Auto Stun Slam** is a separate Combat card, initially inactive. Enable it and
-leave the Stun Slam master switch ON. It activates once per fall when you are
-descending, have fallen at least half a block, and aim directly at a live player
-within normal melee reach and line of sight. It requires an axe in slot 8 and a
-mace in slot 2. It does not trigger on mobs, while in a GUI, while flying/gliding,
-or during another swap/flick. Landing rearms it. The same manual Stun Slam timing
-is used; each attack rechecks the target. Disabling Stun Slam also stops automation.
-Auto mode resets on disconnect and Panic. Multiplayer shield/smash results still
-depend on server combat rules and have not been verified with this automation.
+**Auto Stun** is a separate Combat card, initially inactive. With a sword in
+slot **1** and an axe in slot **8**, it automatically attempts shield stun against
+an aimed, blocking player on the ground—**no mace required**. Keep its own master
+switch and Shield Stun's master switch ON. It uses the normal charged axe attack,
+checks reach/line of sight, and yields during blocking, eating, mining, swinging,
+manual item use, or another swap. The standalone Auto Shield Stun toggle is optional.
+While falling, Auto Stun retains the existing axe-8 / mace-2 combo (requiring a mace
+and the Stun Slam master switch). Landing rearms the falling trigger. Disabling
+Stun Slam's master switch only blocks the falling branch; ground stun can still run.
+The feature attempts the vanilla shield-disable mechanic, not permanent shield
+breakage; the server decides whether the hit disables the shield.
 
 **Block ESP** opens a searchable, paginated list of every registered block under
 Visuals. Search by localized name or full registry ID. Click entries to select
@@ -579,3 +581,23 @@ Clear Vision/rename validation: all 32 unit tests and installer integration chec
 pass. In Fabric 1.21.11, applied Blindness and Darkness together, confirmed fog and
 dimming with Clear Vision off, normal visibility with it on, and restored effect
 visuals after Panic. Confirmed the renamed dashboard and packaged mod metadata.
+
+
+## Redesigned control center
+
+The dashboard now uses an icon sidebar, a larger responsive panel, compact feature
+rows, five accent themes (Mint, Violet, Amber, Rose, Ice), and a global search bar.
+**All states / Active only** filters running toggles; inactive actions remain
+available under All states. Use the mouse wheel over the feature list or the footer
+arrows to page. Right-click any feature to pin it. ON indicates a running feature,
+IDLE an inactive toggle, and LOCK a disabled master switch; the separate switch
+controls whether the feature and its hotkey are allowed. Larger windows add a
+second column and show keybind/category information on each row. The shared styling
+also updates the block library, movement editor, and keybind screen.
+
+Dashboard/ground Auto Stun validation: build and all 35 unit tests pass, including
+ground-mode activation without the standalone shield toggle and independent master
+switch gating. Installer integration checks pass. Verified the dashboard in a
+Fabric 1.21.11 development client at 640×480, 854×480 and 1280×720, including search,
+Active-only filtering and two-column layout. Updated `docs/dashboard.png` from the
+running client. Ground shield-disable outcomes still require multiplayer testing.

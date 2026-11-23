@@ -1,7 +1,7 @@
 {
   "key.category.rasmclient.controls": "DiddyMore Client",
   "key.rasmclient.auto_shield": "Toggle Auto Shield Stun",
-  "key.rasmclient.auto_stun": "Toggle Auto Stun Slam",
+  "key.rasmclient.auto_stun": "Toggle Auto Stun (ground shield / falling mace)",
   "key.rasmclient.block_esp": "Open Block ESP",
   "key.rasmclient.movement_checkpoint": "Movement checkpoint: split recording / mark selected clip",
   "key.rasmclient.movement_replay": "Start / stop movement (selected editor mode)",

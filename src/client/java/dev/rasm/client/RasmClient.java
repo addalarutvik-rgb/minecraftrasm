@@ -264,7 +264,8 @@ public final class RasmClient implements ClientModInitializer {
             case "xray" -> Xray.disable(client);
             case "ghost" -> ghost.clear();
             case "block_esp" -> BlockEsp.disable();
-            case "auto_stun", "stun_slam" -> { autoStun = false; swaps.cancel(client); }
+            case "auto_stun" -> { autoStun = false; swaps.cancel(client); }
+            case "stun_slam" -> swaps.cancel(client);
             case "auto_shield" -> { autoShield = false; swaps.cancelAutomaticShield(client); }
             case "shield_stun" -> { autoShield = false; swaps.cancel(client); }
             case "lunge", "mace", "pearl_catch" -> swaps.cancel(client);
@@ -291,11 +292,17 @@ public final class RasmClient implements ClientModInitializer {
         return false;
     }
 
+    static boolean automaticShieldAllowed() {
+        var c=Minecraft.getInstance();
+        return instance!=null && c.player!=null && AutoStunPolicy.shield(
+            FeatureSwitches.enabled("shield_stun"), instance.autoShield, FeatureSwitches.enabled("auto_shield"),
+            instance.autoStun, FeatureSwitches.enabled("auto_stun"), c.player.onGround());
+    }
     boolean autoShieldActive() { return autoShield; }
     void toggleAutoShield() { autoShield = !autoShield; if (!autoShield) swaps.cancelAutomaticShield(Minecraft.getInstance()); }
     private void tickAutoShield(Minecraft client) {
         if (shieldRetry > 0) shieldRetry--;
-        if (!autoShield || !FeatureSwitches.enabled("auto_shield") || !FeatureSwitches.enabled("shield_stun")
+        if (!automaticShieldAllowed()
                 || shieldRetry > 0 || swaps.active() || turn.active() || SwapActions.busy(client)) return;
         client.gameRenderer.pick(1.0F);
         if (client.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof Player target
@@ -304,7 +311,7 @@ public final class RasmClient implements ClientModInitializer {
     }
 
     boolean autoStunActive() { return autoStun; }
-    void toggleAutoStun() { autoStun = !autoStun; }
+    void toggleAutoStun() { autoStun = !autoStun; if (!autoStun) swaps.cancelAutomaticShield(Minecraft.getInstance()); }
     private void tickAutoStun(Minecraft client) {
         var player = client.player;
         if (player != autoOwner || client.level != autoLevel) {

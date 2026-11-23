@@ -9,11 +9,11 @@ import net.minecraft.network.chat.Component;
 
 /** Shared dashboard styling. Theme choices are cosmetic and last for this session. */
 final class RasmUi {
-    static final int TEXT=0xFFE7EDF7, MUTED=0xFF93A0B7, DIM=0xFF60718A;
-    static final int PANEL=0xFF101522, SURFACE=0xFF181F30, BORDER=0xFF2A3449, RED=0xFFFF849C;
-    private static final int[] ACCENTS={0xFF70E2D2,0xFFB19AFF,0xFFFFC278};
-    private static final String[] THEMES={"Mint", "Violet", "Amber"};
-    private static int theme;
+    static final int TEXT=0xFFF2F3FC, MUTED=0xFFA1A4BD, DIM=0xFF656D88;
+    static final int PANEL=0xFF0F111B, SURFACE=0xFF191C2B, BORDER=0xFF30344B, RED=0xFFFF849C;
+    private static final int[] ACCENTS={0xFF70E2D2,0xFFB19AFF,0xFFFFC278,0xFFFF91B8,0xFF88C8FF};
+    private static final String[] THEMES={"Mint", "Violet", "Amber", "Rose", "Ice"};
+    private static int theme=1;
     static int accent() { return ACCENTS[theme]; }
     static String themeName() { return THEMES[theme]; }
     static void nextTheme() { theme=(theme+1)%ACCENTS.length; }
@@ -44,10 +44,11 @@ final class RasmUi {
         text(g,text,0,0,(int)(max/0.8f),color); g.pose().popMatrix();
     }
     static void frame(GuiGraphics g,int width,int height,int x,int y,int w,int h) {
-        g.fillGradient(0,0,width,height,0xD0080C15,0xC00C1824);
+        g.fillGradient(0,0,width,height,0xD9060710,0xE00B0D18);
         for(int i=8;i>0;i-=2) round(g,x-i,y+i,w+i*2,h,0x12000000);
         box(g,x,y,w,h,PANEL,BORDER);
-        g.fillGradient(x+4,y+1,x+w-4,y+35,0x182EC5C9,0x00101522);
+        g.fillGradient(x+3,y+2,x+w-3,y+48,blend(PANEL,accent(),0.10f),PANEL);
+        g.fill(x+12,y,x+w-12,y+1,blend(BORDER,accent(),0.65f));
     }
     static void line(GuiGraphics g,float x,float y,float x2,float y2,int color) {
         g.pose().pushMatrix(); g.pose().translate(x,y).rotate((float)Math.atan2(y2-y,x2-x));
@@ -78,6 +79,7 @@ final class RasmUi {
             boolean on=selected.getAsBoolean();
             int bg=blend(SURFACE,accent,on?0.19f:hover*0.12f);
             box(g,getX(),getY(),getWidth(),getHeight(),bg,on?blend(BORDER,accent,0.65f):blend(BORDER,accent,hover*0.4f));
+            if(on) g.fill(getX()+2,getY()+5,getX()+4,getY()+getHeight()-5,accent);
             setMessage(Component.literal(label.get()));
             var font=Minecraft.getInstance().font;
             String display=font.plainSubstrByWidth(label.get(),getWidth()-8);

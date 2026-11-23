@@ -113,7 +113,7 @@ final class SwapActions {
     private void tickAutomaticShield(Minecraft client) {
         // If the user starts an action or manually changes slots, yield without another slot packet.
         if (busy(client) || owner.getInventory().getSelectedSlot() != expectedSlot) { stop(); return; }
-        if (!FeatureSwitches.enabled("auto_shield") || !FeatureSwitches.enabled("shield_stun")
+        if (!RasmClient.automaticShieldAllowed()
                 || !owner.getInventory().getItem(7).is(ItemTags.AXES) || ++autoTicks > 40) {
             restore(client); stop(); return;
         }
