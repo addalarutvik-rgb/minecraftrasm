@@ -22,7 +22,7 @@ final class RasmKeybindScreen extends Screen {
     private String query = "";
     private EditBox search;
     RasmKeybindScreen(Screen parent, RasmClient controls) {
-        super(Component.literal("General Optimizer keybinds"));
+        super(Component.literal("Culling Optimizer keybinds"));
         this.parent = parent; bindings = controls.bindings();
     }
     @Override protected void init() {
@@ -37,7 +37,7 @@ final class RasmKeybindScreen extends Screen {
         search.setHint(Component.literal("Search controls...")); search.setValue(query);
         search.setResponder(value -> { query=value; page=0; build(); setFocused(search); });
         addRenderableWidget(search);
-        var shown = bindings.stream().filter(k -> Component.translatable(k.getName()).getString()
+        var shown = bindings.stream().filter(k -> actionName(k)
             .toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT))).toList();
         pages = Math.max(1, (shown.size()+rows-1)/rows); page = Math.min(page,pages-1);
         for (int i=page*rows; i<Math.min(shown.size(),(page+1)*rows); i++) {
@@ -54,6 +54,10 @@ final class RasmKeybindScreen extends Screen {
         var prev=addRenderableWidget(new RasmUi.Control(left+panelWidth-62,top+panelHeight-28,22,20,()->"<",()->{page--;build();},()->false,false));
         var next=addRenderableWidget(new RasmUi.Control(left+panelWidth-34,top+panelHeight-28,22,20,()->">",()->{page++;build();},()->false,false));
         prev.active=page>0; next.active=page+1<pages;
+    }
+    // The client editor shows real actions; vanilla Options uses the public key labels.
+    private String actionName(KeyMapping binding) {
+        return Component.translatable(binding.getName().replace("key.rasmclient.", "action.rasmclient.")).getString();
     }
     private boolean conflict(KeyMapping binding) {
         if(binding.isUnbound()) return false;
@@ -79,11 +83,11 @@ final class RasmKeybindScreen extends Screen {
     @Override public void render(GuiGraphics g,int mx,int my,float delta) {
         RasmUi.frame(g,width,height,left,top,panelWidth,panelHeight);
         g.drawString(font,"KEYBINDS",left+12,top+16,RasmUi.TEXT,false);
-        var shown=bindings.stream().filter(k -> Component.translatable(k.getName()).getString()
+        var shown=bindings.stream().filter(k -> actionName(k)
             .toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT))).toList();
         for(int i=page*rows;i<Math.min(shown.size(),(page+1)*rows);i++) {
             var binding=shown.get(i); int y=top+62+(i-page*rows)*30;
-            RasmUi.text(g,Component.translatable(binding.getName()).getString(),left+12,y+9,panelWidth-183,
+            RasmUi.text(g,actionName(binding),left+12,y+9,panelWidth-183,
                 conflict(binding)?RasmUi.RED:RasmUi.TEXT);
         }
         RasmUi.small(g,listening==null?"Click a binding to change it. Changes save automatically.":"Press a key / mouse button. Backspace: clear. Esc: cancel.",

@@ -21,7 +21,7 @@ final class GhostBlock {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> dispatcher.register(
             literal("ghost").then(literal("clear").executes(context -> {
                 int removed = count(); clear();
-                context.getSource().sendFeedback(Component.literal("General Optimizer: cleared " + removed + " ghost blocks."));
+                context.getSource().sendFeedback(Component.literal("Culling Optimizer: cleared " + removed + " ghost blocks."));
                 return removed;
             }))));
     }
@@ -40,7 +40,7 @@ final class GhostBlock {
         if (client.player == null || client.level == null) return;
         BlockPos at = BlockPos.containing(client.player.getX(), client.player.getBoundingBox().minY - 1, client.player.getZ());
         if (!client.level.getBlockState(at).isAir()) {
-            client.player.displayClientMessage(Component.literal("General Optimizer: move above an empty space to place another ghost block."), true);
+            client.player.displayClientMessage(Component.literal("Culling Optimizer: move above an empty space to place another ghost block."), true);
             return;
         }
         level = client.level; owner = client.player;

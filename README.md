@@ -1,25 +1,25 @@
-# General Optimizer
+# Culling Optimizer
 
-[Download General Optimizer 0.1.0](https://github.com/addalarutvik-rgb/minecraftrasm/raw/refs/heads/main/downloads/general-optimizer-0.1.0.jar)
+[Download Culling Optimizer 0.1.0](https://github.com/addalarutvik-rgb/minecraftrasm/raw/refs/heads/main/downloads/culling-optimizer-0.1.0.jar)
 
 Install with Fabric Loader and Fabric API for Minecraft **1.21.11**. Save the JAR
 in your Minecraft instance's `mods` folder without extracting it.
 
 A Fabric mod for **Minecraft Java 1.21.11** using Java 21, with client-side
 flight and an optional server-permitted flight mode. Client-side flight only
-requires Fabric Loader, Fabric API, and General Optimizer on your own client.
+requires Fabric Loader, Fabric API, and Culling Optimizer on your own client.
 
 ## Desktop installer
 
-[Download the standalone installer](https://github.com/addalarutvik-rgb/minecraftrasm/raw/refs/heads/main/downloads/general-optimizer-installer.jar).
+[Download the standalone installer](https://github.com/addalarutvik-rgb/minecraftrasm/raw/refs/heads/main/downloads/culling-optimizer-installer.jar).
 Double-click it with Java 21 installed, or run `java -jar rasm-installer.jar`.
 Close Minecraft, choose your instance folder (the folder containing `mods`), and
-click **Install / update General Optimizer**. Start your Fabric 1.21.11 installation and press
+click **Install / update Culling Optimizer**. Start your Fabric 1.21.11 installation and press
 `[` to open the dashboard. Fabric Loader and Fabric API must already be installed.
 For launchers with separate instances, use **Browse** to select the right instance.
 
 The installer includes the client; no separate mod download or manual file copy
-is needed. It backs up previous General Optimizer JARs to `rasm-backups` outside `mods`, preserves
+is needed. It backs up previous Culling Optimizer JARs to `rasm-backups` outside `mods`, preserves
 other mods, and refuses to overwrite an unrelated file using the same filename.
 Do not put the installer JAR itself in `mods`.
 
@@ -32,7 +32,7 @@ Windows and macOS have not been tested here.
 
 ## Dashboard
 
-![General Optimizer control center](docs/dashboard.png)
+![Culling Optimizer control center](docs/dashboard.png)
 
 ![Block library](docs/block-library.png)
 
@@ -94,9 +94,9 @@ blocks; cancels combat sequences; restores an active swap's return slot and a
 pending flick's original yaw; and discards queued feature hotkeys. The dashboard
 closes. All feature master switches remain off until you enable them again. The key also works in
 chat/inventory screens, except the keybind editor so you can rebind it normally.
-This disables General Optimizer features, not Minecraft's vanilla glow or creative abilities.
-Server-permitted General Optimizer flight receives an explicit disable-only request when the
-server supports it; multiplayer servers need this updated General Optimizer version for that
+This disables Culling Optimizer features, not Minecraft's vanilla glow or creative abilities.
+Server-permitted Culling Optimizer flight receives an explicit disable-only request when the
+server supports it; multiplayer servers need this updated Culling Optimizer version for that
 request. Existing server-granted permissions are preserved.
 
 ## Lunar on Windows
@@ -113,8 +113,8 @@ The installer cannot add Fabric support to a running Lunar session.
 
 | Default key | Action |
 | --- | --- |
-| `[` | Open the General Optimizer menu |
-| End | Panic: disable all General Optimizer features |
+| `[` | Open the Culling Optimizer menu |
+| End | Panic: disable all Culling Optimizer features |
 | R | Smooth KB flick + Stun Slam |
 | G | Toggle client-side flight |
 | N | Toggle Nofall |
@@ -128,7 +128,7 @@ The installer cannot add Fabric support to a running Lunar session.
 
 Change bindings inside **[ → Keybinds**. Auto Shield Stun and server-permitted
 flight start unbound. Minecraft saves these bindings. If upgrading from an older
-build, reset **Open General Optimizer menu** to **[** in that editor if needed.
+build, reset **Open Culling Optimizer menu** to **[** in that editor if needed.
 
 KB Flick now uses a render-frame smoothstep animation: **150 ms out to +180°**,
 a brief hold until the next attack tick (up to about 50 ms at normal tick rate),
@@ -241,9 +241,9 @@ Glow commands run locally and successful commands stay silent:
 | `/glow Rasmore hiphop` | Assign online player Rasmore to local group hiphop |
 | `/glow Alex hiphop` | Add Alex to the same group |
 | `/glow hiphop blue` | Turn every member of hiphop blue |
-| `/unglow hostiles` | Remove General Optimizer glow from hostile mobs |
+| `/unglow hostiles` | Remove Culling Optimizer glow from hostile mobs |
 | `/unglow Rasmore` | Exclude that player, even when all players glow |
-| `/unglow creeper` | Remove General Optimizer glow from creepers |
+| `/unglow creeper` | Remove Culling Optimizer glow from creepers |
 | `/unglow hiphop` | Remove that group's glow and group definition |
 | `/glow clear` or `/unglow clear` | Clear all local glow rules and groups |
 
@@ -271,7 +271,7 @@ All rules and groups reset on disconnect or Panic.
 
 ## In-client keybind editor
 
-Open **[ → Keybinds** in the General Optimizer menu. Search any registered General Optimizer control,
+Open **[ → Keybinds** in the Culling Optimizer menu. Search any registered Culling Optimizer control,
 including Flight, Pearl Catch, menu access, Panic, Auto Stun Slam, and Block ESP.
 Click its binding and press a keyboard key or mouse button. **Backspace** unbinds;
 **Esc** cancels capture. **Reset** restores that control's default. Red bindings
@@ -326,14 +326,14 @@ such as lava, suffocation, or the void.
 ## Optional server-permitted flight
 
 1. The server owner installs **Fabric Loader for 1.21.11**, **Fabric API for
-   1.21.11**, and the General Optimizer mod JAR in the server's `mods` folder.
-2. Start the server once. General Optimizer creates `config/rasm-flight-allowed-players.txt`
+   1.21.11**, and the Culling Optimizer mod JAR in the server's `mods` folder.
+2. Start the server once. Culling Optimizer creates `config/rasm-flight-allowed-players.txt`
    in the server's working directory, initially granting no multiplayer access.
 3. Stop the server. Add the UUID of each permitted player, one per line. You can
    find a connected player's UUID in the server's `usercache.json`. A denied
    flight request also displays the requesting player's UUID.
 4. Restart the server to load the list. Each permitted player installs Fabric,
-   Fabric API, and the same General Optimizer JAR on their client, then uses **Request server-permitted flight** in the `[` menu.
+   Fabric API, and the same Culling Optimizer JAR on their client, then uses **Request server-permitted flight** in the `[` menu.
 
 Example allowlist (replace this example UUID with your actual player UUID):
 
@@ -345,7 +345,7 @@ Example allowlist (replace this example UUID with your actual player UUID):
 The server checks the actual sender's UUID; clients cannot request flight for
 other players or grant themselves permission. Invalid configuration disables
 multiplayer flight and logs the error. Edit the file and restart the server to
-change permissions. A server without General Optimizer displays an unsupported-server message
+change permissions. A server without Culling Optimizer displays an unsupported-server message
 on the client instead of receiving an unsupported flight request.
 
 The single-player world's owner is allowed automatically. LAN guests need to be
@@ -354,10 +354,10 @@ must be listed. The same JAR can be installed on either side.
 
 Flight changes server-authoritative abilities while keeping survival mode.
 Use Jump to ascend and Sneak to descend. Vanilla double-tap Jump also starts/stops
-flying while permission is enabled. Use the same menu button to revoke General Optimizer's grant. Disabling in
+flying while permission is enabled. Use the same menu button to revoke Culling Optimizer's grant. Disabling in
 midair can cause fall damage after you start falling. Flight is reset on respawn,
 disconnect, and server shutdown. Creative/spectator abilities remain with vanilla.
-Existing flight permission is restored when a General Optimizer grant ends.
+Existing flight permission is restored when a Culling Optimizer grant ends.
 
 This optional mode requires server support and permission. Client-side flight
 remains available separately using G. The server-permitted mode does not require enabling
@@ -382,7 +382,7 @@ Tests: `./gradlew test`. The wrapper verifies Gradle's SHA-256 checksum.
 21 JUnit tests passed (five movement tests, four permission tests, three
 turn-state tests, three NoFall selection tests, three backward target-selection tests,
 two once-per-fall trigger tests, and one master-switch/Panic test).
-The dedicated-server launch loaded General Optimizer in the server environment and stopped
+The dedicated-server launch loaded Culling Optimizer in the server environment and stopped
 at Minecraft's EULA gate (`run/eula.txt` remains `eula=false`).
 
 The client was also launched under a virtual display into a disposable survival
@@ -411,7 +411,7 @@ Use a disposable world and a test Fabric server:
 - Test toggle-off, respawn, disconnect/rejoin, server restart, and creative/
   spectator transitions. Verify pre-existing flight permission is preserved.
 - Confirm single-player supports both modes without an allowlist entry.
-- Join a server without General Optimizer and confirm client flight can be toggled locally,
+- Join a server without Culling Optimizer and confirm client flight can be toggled locally,
   while the server-flight menu button displays the unsupported message.
 
 Automated movement, permission, and turn tests do not replace these interactive checks.
@@ -572,7 +572,7 @@ the HUD and their server-side durations/mechanics remain intact. Switching it of
 restores the visuals immediately while effects are still active. Ordinary night,
 cave lighting, water/lava fog and other effects remain normal.
 
-The client is now named **General Optimizer** in its menu, mod metadata, keybinds
+The client is now named **Culling Optimizer** in its menu, mod metadata, keybinds
 and installer. The internal `rasmclient` mod ID is retained so existing bindings
 and installer upgrade detection continue to work. Replace the old JAR rather than
 installing both copies.
@@ -603,24 +603,24 @@ Active-only filtering and two-column layout. Updated `docs/dashboard.png` from t
 running client. Ground shield-disable outcomes still require multiplayer testing.
 
 
-## General Optimizer keybind labels
+## Culling Optimizer keybind labels
 
-The mod, dashboard, keybind category and installer now display **General Optimizer**.
+The mod, dashboard, keybind category and installer now display **Culling Optimizer**.
 Keybind display names are cosmetic aliases, not new implementations of the named
 optimizations. The actual actions, dashboard feature names, saved keys and internal
-mod ID are unchanged. Both the in-client editor and Minecraft's keybind screen use
-these labels:
+mod ID are unchanged. Only Minecraft's **Options → Controls → Key Binds → Culling Optimizer** uses
+these labels. The **[ menu and its Keybinds editor** use real action names:
 
 | Existing action | New keybind label |
 | --- | --- |
-| Open menu | Open General Optimizer |
+| Open menu | Open Culling Optimizer |
 | KB Flick | FullBright |
 | Flight | Smooth Camera |
 | NoFall | Chunk Stabilizer |
 | Lunge Swap | Frame Pacing |
 | Mace Swap | Fast Rendering |
 | Ghost Block | Block Preview |
-| Server Flight | Server Sync |
+| Server Flight | Chunk Synchronization |
 | Stun Slam | Entity Culling |
 | X-ray | Occlusion Culling |
 | Pearl Catch | Particle Optimizer |
@@ -628,13 +628,18 @@ these labels:
 | Panic | Reset Optimizations |
 | Auto Shield Stun | Adaptive Culling |
 | Auto Stun | Dynamic Optimization |
-| Block ESP | Block Inspector |
-| Movement checkpoint | Save Viewpoint |
-| Movement record/replay | Camera Playback |
+| Block ESP | Render Regions |
+| Movement checkpoint | Save Render Preset |
+| Movement record/replay | Apply Render Preset |
 | Clear Vision | Visual Clarity |
 
 Replace the previous mod JAR; do not install multiple renamed copies together.
 
 Rename validation: build and all 35 tests pass; installer integration checks pass.
 Verified the packaged mod name/unchanged mod ID and unique translations for all 19
-registered keybindings. Both keybind editors use the same translation entries.
+registered keybindings. The in-client editor now has separate action translations, including its search results.
+
+Culling Optimizer label validation: build, all 35 tests and installer integration
+checks pass. Verified separate vanilla aliases and real in-client action labels
+for all 19 registered bindings in the packaged JAR, with unique vanilla labels.
+The dashboard feature names and saved binding IDs remain unchanged.

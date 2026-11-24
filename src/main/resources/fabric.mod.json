@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "rasmclient",
   "version": "${version}",
-  "name": "General Optimizer",
+  "name": "Culling Optimizer",
   "description": "Quick-turn controls, client-side flight, and optional server-permitted flight.",
   "environment": "*",
   "entrypoints": {

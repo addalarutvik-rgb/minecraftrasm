@@ -26,7 +26,7 @@ public final class NoFall {
             enabledLevel = client.level;
         }
         if (client.player != null) client.player.displayClientMessage(
-            Component.literal("General Optimizer: NoFall " + (active() ? "ON" : "OFF") + "."), true);
+            Component.literal("Culling Optimizer: NoFall " + (active() ? "ON" : "OFF") + "."), true);
     }
 
     public static void tick(Minecraft client) {

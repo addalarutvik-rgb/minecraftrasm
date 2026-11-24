@@ -27,7 +27,7 @@ final class RasmScreen extends Screen {
     }
 
     RasmScreen(RasmClient controls) {
-        super(Component.literal("General Optimizer dashboard"));
+        super(Component.literal("Culling Optimizer dashboard"));
         this.controls = controls;
         features.add(new Feature("Combat", "KB Flick", "Smooth 180 and back + Stun Slam", "flip", () -> controls.quickTurn(minecraft), null, true));
         features.add(new Feature("Combat", "Stun Slam", "Slot 1 > axe 8 > mace 2", "stun_slam", () -> controls.swaps.stunSlam(minecraft), null, true));
@@ -128,8 +128,8 @@ final class RasmScreen extends Screen {
         RasmUi.round(g,left+4,top+4,sidebar-4,panelHeight-8,0xFF10131F);
         g.fill(left+sidebar,top+12,left+sidebar+1,top+panelHeight-12,RasmUi.BORDER);
         RasmUi.box(g,left+12,top+12,27,25,RasmUi.blend(RasmUi.PANEL,RasmUi.accent(),0.18f),RasmUi.blend(RasmUi.BORDER,RasmUi.accent(),0.5f));
-        g.drawString(font,"GO",left+19,top+21,RasmUi.accent(),false);
-        g.drawString(font,"General",left+12,top+42,RasmUi.TEXT,false);
+        g.drawString(font,"CO",left+19,top+21,RasmUi.accent(),false);
+        g.drawString(font,"Culling",left+12,top+42,RasmUi.TEXT,false);
         g.drawString(font,"Optimizer",left+12,top+52,RasmUi.TEXT,false);
         RasmUi.small(g,"MC 1.21.11",left+12,top+64,sidebar-20,RasmUi.DIM);
         String title=query.isBlank()?category:"Search results";
