@@ -8,7 +8,7 @@ import zipfile
 repo = Path(__file__).resolve().parents[1]
 java = str(Path(os.environ['JAVA_HOME']) / 'bin/java') if 'JAVA_HOME' in os.environ else 'java'
 installer = repo / 'build/libs/rasm-installer.jar'
-payload = repo / 'build/libs/rasm-client-0.1.0.jar'
+payload = repo / 'build/libs/culling-optimizer-0.2.0.jar'
 
 def run(instance, success=True):
     result = subprocess.run([java, '-jar', str(installer), '--install', str(instance)], capture_output=True, text=True)

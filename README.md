@@ -1,6 +1,6 @@
 # Culling Optimizer
 
-[Download Culling Optimizer 0.1.0](https://github.com/addalarutvik-rgb/minecraftrasm/raw/refs/heads/main/downloads/culling-optimizer-0.1.0.jar)
+[Download Culling Optimizer 0.2.0](https://github.com/addalarutvik-rgb/minecraftrasm/raw/refs/heads/main/downloads/culling-optimizer-0.2.0.jar)
 
 Install with Fabric Loader and Fabric API for Minecraft **1.21.11**. Save the JAR
 in your Minecraft instance's `mods` folder without extracting it.
@@ -8,6 +8,21 @@ in your Minecraft instance's `mods` folder without extracting it.
 A Fabric mod for **Minecraft Java 1.21.11** using Java 21, with client-side
 flight and an optional server-permitted flight mode. Client-side flight only
 requires Fabric Loader, Fabric API, and Culling Optimizer on your own client.
+
+## Updating in Lunar
+
+Close Minecraft completely. In Lunar’s custom-mods interface for your Fabric
+1.21.11 profile, remove the existing Rasm Client, General Optimizer or Culling
+Optimizer entry, then import **culling-optimizer-0.2.0.jar** and restart that profile.
+Keep only one copy of this mod. The mod list must show **Culling Optimizer 0.2.0**;
+the `[` dashboard also shows the loaded version. Minecraft’s keybind category is
+**Culling Optimizer**, with labels such as **FullBright** and **Entity Culling**.
+The feature names inside the `[` menu remain unchanged.
+
+If you still see “Rasm Client”, that profile is loading an older JAR. Adding a file
+to another Minecraft instance does not replace Lunar’s imported copy. The desktop
+installer updates a selected mods folder; it does not manage Lunar’s custom-mods
+imports. Lunar-specific loading has not been verified in this environment.
 
 ## Desktop installer
 
@@ -369,7 +384,7 @@ flight abilities on the server. Other server mods may impose additional rules.
 1. Install **JDK 21** (a Java runtime alone is insufficient).
 2. Run `./gradlew build` on Linux/macOS or `gradlew.bat build` on Windows.
 3. Install Fabric Loader and Fabric API for Minecraft **1.21.11**.
-4. Copy `build/libs/rasm-client-0.1.0.jar` into the instance's `mods` folder.
+4. Copy `build/libs/culling-optimizer-0.2.0.jar` into the instance's `mods` folder.
    Do not use the `-sources.jar` file.
 
 Development client: `./gradlew runClient`. Dedicated development server:

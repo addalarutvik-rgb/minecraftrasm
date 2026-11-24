@@ -89,7 +89,7 @@ public final class RasmInstaller {
         Path mods = instance.resolve("mods");
         if (!Files.isDirectory(instance) || !Files.isDirectory(mods))
             throw new IOException("Choose an existing Minecraft instance folder containing a mods folder. Install Fabric first.");
-        Path destination = mods.resolve("rasm-client-0.1.0.jar");
+        Path destination = mods.resolve("culling-optimizer-0.2.0.jar");
         List<Path> oldVersions = new ArrayList<>();
         try (var entries = Files.list(mods)) {
             for (Path file : entries.filter(p -> p.getFileName().toString().endsWith(".jar")).toList()) {

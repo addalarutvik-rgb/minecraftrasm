@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.BooleanSupplier;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -14,6 +15,8 @@ import net.minecraft.network.chat.Component;
 
 /** Compact dashboard; categories and pagination keep every control reachable at high GUI scale. */
 final class RasmScreen extends Screen {
+    private static final String VERSION = FabricLoader.getInstance().getModContainer("rasmclient")
+        .map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("unknown");
     private final RasmClient controls;
     private final List<Feature> features = new ArrayList<>();
     private final List<Button> cards = new ArrayList<>();
@@ -131,7 +134,7 @@ final class RasmScreen extends Screen {
         g.drawString(font,"CO",left+19,top+21,RasmUi.accent(),false);
         g.drawString(font,"Culling",left+12,top+42,RasmUi.TEXT,false);
         g.drawString(font,"Optimizer",left+12,top+52,RasmUi.TEXT,false);
-        RasmUi.small(g,"MC 1.21.11",left+12,top+64,sidebar-20,RasmUi.DIM);
+        RasmUi.small(g,"v" + VERSION + " / 1.21.11",left+12,top+64,sidebar-20,RasmUi.DIM);
         String title=query.isBlank()?category:"Search results";
         g.drawString(font,title,contentX,top+14,RasmUi.TEXT,false);
         RasmUi.small(g,"YOUR CLIENT. YOUR CONTROLS.",contentX,top+28,contentWidth-35,RasmUi.MUTED);
