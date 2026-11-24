@@ -43,7 +43,7 @@ public final class RasmMod implements ModInitializer {
                     .resolve("rasm-flight-allowed-players.txt"));
             } catch (IOException error) {
                 access = FlightAccess.denyMultiplayer();
-                LOGGER.error("Could not load DiddyMore flight permissions; multiplayer requests will be denied", error);
+                LOGGER.error("Could not load General Optimizer flight permissions; multiplayer requests will be denied", error);
             }
         });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
@@ -107,6 +107,6 @@ public final class RasmMod implements ModInitializer {
     }
 
     private void message(ServerPlayer player, String text) {
-        player.sendSystemMessage(Component.literal("DiddyMore: " + text));
+        player.sendSystemMessage(Component.literal("General Optimizer: " + text));
     }
 }
